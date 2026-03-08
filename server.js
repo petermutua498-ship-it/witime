@@ -1,8 +1,9 @@
 require('dotenv').config();
-const express  = require ('express');
-const axios = require('axios');
-const sqlite3 = require('sqlite3').verbose();
+const express  = require ("express");
+const axios = require("axios");
+const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const { moveMessagePortToContext } = require('worker_threads');
 
 const app = express();
 app.use(express.json());
@@ -58,7 +59,7 @@ async function getAccessToken() {
 }
 
 app.post('/pay', async (req, res) => {
-    const {packageId, phone } = req.body;
+    const {phone, packageId } = req.body;
 
     if (!packages[packageId])
         return res.json({ error: "Invalid package"});
@@ -66,7 +67,8 @@ app.post('/pay', async (req, res) => {
     ).get(Date.now());
 
     if (activeCount.count >= MAX_USERS)
-        return res.json({ error: "Max 6 users reached"});
+        return res.json({error: "Max 6 users reached"}
+    );
 
     try {
         const token = await getAccessToken();
@@ -82,24 +84,23 @@ app.post('/pay', async (req, res) => {
         }
 
         const timestamp = getTimestamp();
-
         const password = Buffer.from(shortcode + passkey + timestamp)
         .toString("base64");
 
-        await axios.post(
+        const stkResponse = await axios.post(
             "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
             {
-                BusinessShortCode: shortcode,
-                Password: password,
-                Timestamp: timestamp,
+                BusinessShortCode: "174379",
+                Password: Buffer.from(shortcode + passkey + timestamp).toString("base64"),
+                Timestamp: moment().format("YYYYMMDDHHmmss"),
                 TransactionType: "CustomerPayBillOnline",
                 Amount: packages[packageId].amount,
-                PartyA: phone,
-                PartyB: shortcode,
-                Phonenumber: phone,
-                CallBackUrl: HOST_URL + "/callback",
-                AccountReference: "Test",
-                transactionDesc: "Test Payment"
+                PartyA: "2547xxxxxxxx",
+                PartyB: 174379,
+                Phonenumber: "2547xxxxxxxx",
+                CallBackUrl: "https://witime-o2tz.onrender.com/callback",
+                AccountReference: "witime",
+                transactionDesc: "WiFi Payment"
             },
             {
                 headers: {
@@ -108,11 +109,16 @@ app.post('/pay', async (req, res) => {
             }
         );
 
-        res.send({ message: "STK Push Sent" });
+        console.log(stkResponse.data)
+
+        res.json({ message: "STK Push Sent" });
 
     } catch (err) {
         console.error("STK Push error:", err.response?.data || err.message);
-        res.status(500).send("STK push failed, Check server logs for details.");
+        
+        res.status(500).json({
+            error: "STK push failed"
+        });
     }
 });
 

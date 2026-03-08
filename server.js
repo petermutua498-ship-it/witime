@@ -32,19 +32,19 @@ app.use(express.urlencoded({ extended: true }));
 const MAX_USERS = 6;
 
 const packages = {
-    1: {amount: 10, hours: 1},
-    1: {amount: 20, hours: 2},
-    1: {amount: 30, hours: 3},
-    1: {amount: 50, hours: 5}
+    1: {amount: 5, hours: 1},
+    2: {amount: 10, hours: 2},
+    3: {amount: 25, hours: 3},
+    4: {amount: 50, hours: 6},
+    5: {amount: 70, hours: 12}
 };
 
-const PORT = process.env.PORT || 3000;
-const HOST_URL = process.env.HOST_URL || `https://witimes.onrender.com`;
+const HOST_URL = process.env.HOST_URL || `https://witime-o2tz.onrender.com`;
 const CONSUMER_KEY = process.env.CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
 
 const shortcode = "174379";
-const passkey = "bfb279f9aa9bdbcf158e97dd0d6bdbcf158e97dd0d6bdbcf158e97dd0d6bdbcf158e97dd0d6bdbcf";
+const passkey = "bfb279f9aa9bdbcf1582a8c4d7d6b8f2c3d8b4d3a0f6c4d2b1c6e0f2a5a7bb9c";
 
 async function getAccessToken() {
     const response = await axios.get(
@@ -183,6 +183,7 @@ app.get('/admin/stats', (req, res) => {
     res.json({users, payments});
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-console.log("Server running on port ${PORT}")
+console.log("Server running")
 });

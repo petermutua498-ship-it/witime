@@ -1,184 +1,138 @@
-require('dotenv').config();
-const express  = require ("express");
-const axios = require("axios");
-const sqlite3 = require("sqlite3").verbose();
-const path = require("path");
-const { moveMessagePortToContext } = require('worker_threads');
+const express = require("express");
+const { v4: uuidv4 } = require("uuid");
+const https = require("https");
 
 const app = express();
-app.use(express.json());
-app.use(express.static('public'));
-
-const db = new sqlite3.Database('./database.db');
-
-db.prepare(`CREATE TABLE IF NOT EXISTS users (
-    phone TEXT PRIMARY KEY,
-    expiry INTEGER
-)
-`).run();
-
-db.prepare(`
-    CREATE TABLE IF NOT EXISTS payments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    phone TEXT,
-    amount INTEGER,
-    hours INTEGER,
-    date INTEGER
-)
-`).run();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
-const MAX_USERS = 6;
+const MAX_MEMBERS = 6;
+let members = [];
 
-const packages = {
-    1: {amount: 5, hours: 1},
-    2: {amount: 10, hours: 2},
-    3: {amount: 25, hours: 3},
-    4: {amount: 50, hours: 6},
-    5: {amount: 70, hours: 12}
-};
-
-const HOST_URL = process.env.HOST_URL || `https://witime-o2tz.onrender.com`;
-const CONSUMER_KEY = process.env.CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
-
-const shortcode = "174379";
-const passkey = "bfb279f9aa9bdbcf1582a8c4d7d6b8f2c3d8b4d3a0f6c4d2b1c6e0f2a5a7bb9c";
-
-async function getAccessToken() {
-    const response = await axios.get(
-        "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-        {
-            auth: { username: CONSUMER_KEY, password: CONSUMER_SECRET}
-        }
-    );
-
-    return resp.data.access.token;
+function generateCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-app.post('/pay', async (req, res) => {
-    const {phone, packageId } = req.body;
+function getminutes(amount) {
+    if(amount == 5) return 60;
+    if(amount == 10) return 120;
+    if(amount == 25) return 180;
+    if(amount == 50) return 360;
+    if(amount == 70) return 720;
+}
 
-    if (!packages[packageId])
-        return res.json({ error: "Invalid package"});
-    const activeCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE expiry > ?'
-    ).get(Date.now());
+app.get("/ping", (req, res) => {
+    res.send("Server alive");
+}) 
 
-    if (activeCount.count >= MAX_USERS)
-        return res.json({error: "Max 6 users reached"}
-    );
+app.post("/verify", (req, res) => {
+    const { phone, amount } = req.body;
 
-    try {
-        const token = await getAccessToken();
-
-        const timestamp = moment().format("YYYYMMDDHHmmss");
-        const password = Buffer.from(shortcode + passkey + timestamp)
-        .toString("base64");
-
-        const stkResponse = await axios.post(
-            "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-            {
-                BusinessShortCode: "174379",
-                Password: password,
-                Timestamp: timestamp,
-                TransactionType: "CustomerPayBillOnline",
-                Amount: 1,
-                PartyA: "2547xxxxxxxx",
-                PartyB: 174379,
-                Phonenumber: "2547xxxxxxxx",
-                CallBackUrl: "https://witime-o2tz.onrender.com/callback",
-                AccountReference: "witime",
-                transactionDesc: "WiFi Payment"
-            },
-            {
-                headers: {
-                    Authorization: "Bearer " + token 
-                }
-            }
-        );
-
-        console.log(stkResponse.data);
-
-        res.json({ message: "STK Push Sent", data: stkResponse.data });
-
-    } catch (err) {
-        console.error("STK Push error:", err.response?.data || err.message);
-        
-        res.status(500).json({error: "STK push failed"
-        });
-    }
-});
-
-app.post('/callback', (req, res) => {
-    console.log("STK Callback received:", req.bpdy);
-
-    try{
-        const items = req.body.Body.stkcallback.CallbackMetadata.Item;
-        const phoneItem = items.find(
-            i => i.Name === "PhoneNumber");
-
-        const amountItem = items.find(
-            i => i.Name === "Amount");
-
-       if (phoneItem && amountItem) {
-        const phone = phoneItem.Value;
-        const amount = amountItem.Value;
-        const hours = Object.values(packages).find(p => p.amount === amount)?.hours || 1;
-       }
-
-        const expiry = Date.now() + hours * 3600000;
-
-        db.prepare(`INSERT OR REPLACE INTO users (phone, expiry)
-            VALUES (?, ?)
-            `).run(phone, expiry);
-
-        db.prepare(`
-            INSERT INTO payments (phone, amount, hours, date)
-            VALUES (?, ?, ?, ?)
-            `).run(phone, amount, hours, Date.now()
-        );
-
-            console.log("User Activated:, ${phone} for $ {hours} hours");
-    } catch (err) {
-        console.error(`Callback parsing error:`, err.message);
+    if (!phone || !amount) {
+        return res.status(400).json({ error: "Phone required" });
     }
 
-    res.status(200).send("ok")
-});
+    if (members.length >= MAX_MEMBERS) {
+        return res.status(400).json({ error: "Member limit reached"});
+    }
 
-app.get('/check-access', (req, res) => {
+    const code = generateCode();
 
-    const { phone } = req.query;
+    members.push({ phone, amount, code });
 
-    const user = db.prepare(
-        'SELECT * FROM users WHERE phone = ?'
-    ).get(phone);
-
-    if(!user || Date.now() > user.expiry)
-        return res.json({ access: false });
+    console.log("Payment:", phone, amount, "Code:", code);
 
     res.json({
-        access: true,
-        timeLeft: Math.floor((user.expiry - Date.now()) / 60000) 
+        message: "Payment successful. Code sent."
     });
 });
 
-app.get('/admin/stats', (req, res) => {
+app.get("/session", (req, res) => {
 
-    const users = db.prepare(
-        'SELECT * FROM users'
-    ).all();
+    const userIP = req.ip;
 
-    const payments = db.prepare(`
-        SELECT * FROM payments`
-    ).all();
+    const member = members.find(u => u.ip === userIP);
+    
+    if(!member){
+        return res.json({active:false});
+    }
 
-    res.json({users, payments});
+    if(Date.now() > member.expires){
+        return res.json({active:false});
+    }
+
+    res.json({
+        active:true,
+        expires: member.expires
+    });
+});
+
+app.post("/verify", (req, res) => {
+    const { phone, code} = req.body;
+    const member = members.find(m = m.phone === phone);
+
+    if (!member) return res.json({ message: "User not found" });
+    if(member.code !== code) return res.json({ message: "Invalid Code" });
+
+    const userIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+
+    if (member.ip && member.ip !== userIP) {
+        return res.json({ message: "Code already used on aother device"});
+    }
+
+    member.verified = true;
+    member.ip = userIP;
+    member.session = uuidv4();
+    member.expires = Date.now() + getMinutes(member.amount) * 60000;
+
+    res.json({ message: "Access granted", session: member.session })
+});
+
+app.post("/pay",(req, res) => {
+    const {phone, amount}=req.body;
+
+    if(!phone || !amount){
+        return res.json({message:"Missing payment details"});
+    }
+
+    const code=Math.floor(1000+Math.random()*9000);
+
+    members.push({
+        phone,
+        amount,
+        code
+    });
+
+    res.json({
+        message:"Payment request sent. Code: "+code
+    });
+});
+
+app.get("/admin/users", (req, res) => {
+    res.json(members);
+});
+
+setInterval(() => {
+    const now = Date.now();
+    members = members.filter(user => now < user.expires || !user.expires);
+}, 60000);
+
+setInterval(() => {
+    const url = "https://witime-o2tz.onrender.com/ping";
+    https.get(url, () => {
+        console.log("Internal ping to prevent sleep");
+    }).on("error", (err) => {
+        console.log("ping error:", err.message);
+    });
+}, 10 * 60 * 1000);
+
+app.get("/reset", (req, res) => {
+    members = [];
+    res.send("Members reset");
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-console.log("Server running")
+    console.log("Server running")
 });

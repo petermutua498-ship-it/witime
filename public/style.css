@@ -1,0 +1,115 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+    padding:0;
+    display: flex;
+    flex-direction:column;
+    justify-content: flex-start;
+    align-items: center;
+    background: linear-gradient(120deg, #ff9a9e, #fad0c4, #a18cd1);
+}
+
+h2{
+    margin-top:40px;
+    color:#333
+}
+
+.package{
+    background:#2575fc;
+    color: white;
+    width: 220px;
+    padding: 18px;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    gap: 25px;
+}
+
+.packages{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.package:hover{
+    background: #1a5edb;
+    transform:scale(1.05);
+}
+
+.cotainer {
+ background: white;
+ padding: 25px;
+ border-radius: 10px;
+ box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+ text-align: center;
+}
+
+input {
+    padding: 10px;
+    margin-top: 10px;
+    width: 90%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    margin-top: 12px;
+    padding: 10px;
+    width: 95%;
+    border: none;
+    border-radius: 6px;
+    background: #2575fc;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    background:#1a5edb;
+}
+
+button:disabled{
+    background: #888;
+    cursor:not-allowed;
+}
+
+.message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.error {
+    color: #ffbaba;
+}
+
+.pay-page{
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.pay-page input{
+    padding: 12px;
+    width: 220px;
+    border-radius: 8px;
+    border: none;
+}
+
+.pay-page button{
+    padding: 12px;
+    width: 220px;
+    border-radius: 8px;
+    background: #ff9800;
+    color: white;
+    border: none;
+    cursor: pointer;
+}

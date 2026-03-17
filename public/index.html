@@ -1,41 +1,93 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Witime Wifi</title>
-</head>
-<body>
-    <h2>Payment</h2>
+    <head>
+        <title>WITIME</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h2>WITIME PACKAGES</h2>
 
-    <label>Package</label>
-    <select id="package">
-        <option value="1">1 Hour - 5ksh</option>
-        <option value="2">2 Hours - 10ksh</option>
-        <option value="3">3 Hours - 25ksh</option>
-        <option value="4">6 Hours - 50ksh</option>
-        <option value="5">12 hours - 70ksh</option>
-    </select>
+        <div class="packages">
+            <div class="package" onclick="choose(5)">5kes - 1 Hour</div>
+            <div class="package" onclick="choose(10)">10kes - 2 Hours</div>
+            <div class="package" onclick="choose(25)">25kes - 3 Hours</div>
+            <div class="package" onclick="choose(50)">50kes - 6 Hours</div>
+            <div class="package" onclick="choose(70)">70kes - 12 Hours</div>
+        </div>
 
-<label>phone:</label>
-<input type="text" id="phone" placeholder="2547xxxxxxxx" value="2547xxxxxxxx"><br><br>
+        <script>
+            let amount = localStorage.getItem("amount");
 
-<button id="payBtn">pay</button>
+            window.onload =async function(){
 
-<p id="msg"></p>
+                const res = await fetch("/session");
+                const data = await res.json();
 
-<script>
-    document.getElementById("payBtn").addEventListener("click", async () => {
-        const phone = document.getElementById("phone").value;
-        const packageId = document.getElementById("package").value;
+                if(data.active){
+                    document.getElementById("timerBox").style.display="block";
 
-        const resp = await fetch("/pay", { 
-            method: "POST", 
-            headers: {"Content-type":"application/json" },
-            body: JSON.stringify({ phone, packageId })
-        });
+                    startTimer(data.expires);
 
-        const text = await resp.text();
-        document.getElementById("msg").innerText = text;
-    });  
-</script>
-</body>
+                    document.getElementById("verifyMsg").innerText = "Session restored";
+                }
+
+                if(amount){
+                    document.getElementById("selectedPackage").innerText = "Selected Package: " + amount + "KES";
+                }
+            }
+
+            function choose(amount){
+                localStorage.setItem("amount", amount);
+                window.location.href = "pay.html";
+            }
+
+            async function pay() {
+                const phone = document.getElementById("phone").value;
+                const btn = document.getElementById("payBtn");
+
+                if(!phone){
+                    document.getElementById("msg").innerText = "Enter phone number";
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "processing...";
+
+                const res = await fetch("/pay", {
+                    method:"POST",
+                    headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({ phone, 
+                    amount: localStorage.getItem("amount") })
+                });
+
+                const data = await res.json();
+
+                document.getElementById("msg").innerText = data.message;
+
+                btn.disabled = false;
+                btn.innerText = "Pay";
+
+            }
+
+            async function verify() {
+                const phone = document.getElementById("phone").value;
+                const code=document.getElementById("code").value;
+
+                const res=await fetch("/verify", {
+                    method: "POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({phone,code})
+                });
+
+                const data=await res.json();
+                document.getElementById("verifyMsg").innerText=data.message;
+
+                if(data.expires){
+                    document.getElementById("timerBox").style.display="block";
+
+                    startTimer(data.expires);
+                }
+            }
+        </script>
+    </body>
 </html>

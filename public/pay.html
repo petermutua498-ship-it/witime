@@ -75,12 +75,14 @@
             }
             
 
-            fetch("/pay", {
+            fetch("/stk", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ 
-                    phone: phone, 
-                    package: packageId
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    amount: 1
                 })
             })
             .then(res =>  res.json())

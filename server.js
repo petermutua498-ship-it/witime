@@ -42,6 +42,24 @@ mongoose.connect(process.env.MONGO_URL, {
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log("DB ERROR:", err));
 
+app.post("/stk", async (req, res) => {
+    try {
+        const { phone, amount } = req.body;
+
+        console.log("PHONE:", phone);
+
+        const result = await sendSTK(phone, amount);
+
+        console.log("STK HIT");
+
+        res.json(result);
+    } catch (err) {
+        cosole.log("STK ERROR:", err.message);
+        res.status(500).json({ error: "STK failed" });
+    }
+
+});
+
 app.post("/callback", async (req, res) => {
     const data = req.body.Body.stkCallback;
 
@@ -73,6 +91,10 @@ app.post("/callback", async (req, res) => {
 
     res.json({ ok:true });
 });
+
+function generateCode(){
+    return Math.random().toString(36).substring(2,8).toUpperCase();
+}
 
 app.post("/auth", async (req, res) => {
     const {ip, deviceid} = req.body;
@@ -106,6 +128,7 @@ async function stkPush(phone, amount) {
     });
 
     const token = auth.data.access_token;
+
     const response = await axios.post(
         "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
         {
@@ -136,26 +159,6 @@ const packages = {
     "6 hours": {price: 50, duration: 360},
     "12 hours": {price: 80, duration: 720},
 };
-
-function generateCode(){
-    return Math.random().toString(36).substring(2,8).toUpperCase();
-}
-
-app.post("/create-session", async (req, res) => {
-    const { phone, package} = req.body;
-
-    const code = Math.floor(100000 + Math.random() * 900000);
-    const expiry = new Date(Date.now() + 60 * 60 * 1000);
-
-    await Session.create({
-        phone,
-        code,
-        active: false,
-        expiresAt: expiry
-    });
-
-    await sendSMS(phone, ("Your Witime code is: ${code}"))
-});
 
 async function checkAccess() {
     const ip = await fetch ("https://api.ipify.org?format=json")
@@ -216,7 +219,7 @@ app.get("/admin/stats", async (req,res) => {
 app.post("/admin/login", async (req, res) => {
     const { username, password } = req.body;
 
-    const admin = await admin.findOne({ username, password });
+    const admin = mongoose.model("admin", { username, password });
 
     if (!admin) return res.json({ status: "failed" });
 

@@ -35,7 +35,10 @@ async function checkUserLimit() {
 
 let activeCodes = [];
 
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log("DB ERROR:", err));
 
@@ -251,12 +254,20 @@ app.get("/status/:phone", async (req, res) => {
     }
 });
 
-setInterval(async () => {
-    await Session.updateMany(
-        { expiresAt: {$lt: new Date() } },
-        { active: false }
-    );
-}, 60000);
+mongoose.connection.once("open", () => {
+    console.log("DB READY");
+    
+    setInterval(async () => {
+        try {
+            await Session.updateMany(
+                { expiresAt: {$lt: new Date() } },
+                { active: false }
+            );
+        } catch (err) {
+            console.log("Expiry error:", err.message);
+        }
+    }, 6000);
+});
 
 app.listen(PORT, () => {
     console.log("Server running")

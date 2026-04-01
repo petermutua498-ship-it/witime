@@ -6,23 +6,20 @@
         <style>
             body {
                 font-family: Arial;
-                background: linear-gradient(to right, #2193b0, #6dd5ed);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
+                background: #00bcd4;
+                padding-top: 50px;
+                text-align: center;
             }
 
             .box {
                 background: white;
-                padding: 25px;
-                border-radius: 12px;
-                width: 300px;
-                text-align: center;
+                padding: 20px;
+                border-radius: 10px;
+                display:inline-block;
             }
 
             input, button {
-                width: 100%;
+                width: 200px;
                 padding: 10px;
                 margin-top: 10px;
             }
@@ -31,13 +28,18 @@
                 margin-top: 15px;
                 display: none;
             }
+
+            button {
+                background: #2196f3;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
         </style>
     </head>
 <body>
     <div class="box">
         <h3> Enter Phone</h3>
-
-    
 
         <input type="text" id="phone" placeholder="2547xxxxxxxx" autocomplete="tel" required>
 

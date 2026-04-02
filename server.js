@@ -50,9 +50,8 @@ app.post("/stk", async (req, res) => {
 
         const result = await sendSTK(phone, amount);
 
-        console.log("STK HIT");
-
         res.json(result);
+        
     } catch (err) {
         console.log("STK ERROR:", err.message);
         res.status(500).json({ error: "STK failed" });
@@ -120,6 +119,14 @@ function bandwidthMiddleware(req, res, next) {
 }
 
 async function stkPush(phone, amount) {
+    console.log("Sending STK to:", phone);
+
+    return {
+        success: true,
+        phone,
+        amount
+    };
+
     const auth = await axios.get(process.env.DARAJA_TOKEN_URL, {
         auth: {
             username: process.env.CONSUMER_KEY,

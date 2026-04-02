@@ -54,7 +54,7 @@ app.post("/stk", async (req, res) => {
 
         res.json(result);
     } catch (err) {
-        cosole.log("STK ERROR:", err.message);
+        console.log("STK ERROR:", err.message);
         res.status(500).json({ error: "STK failed" });
     }
 

@@ -14,8 +14,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://admin:5566@ac-x4lpdxk-shard-00-00.lf7iqch.mongodb.net:27017,ac-x4lpdxk-shard-00-01.lf7iqch.mongodb.net:27017,ac-x4lpdxk-shard-00-02.lf7iqch.mongodb.net:27017/?ssl=true&replicaSet=atlas-ut0x90-shard-0&authSource=admin&appName=Cluster0/witime")
-
 const Session = mongoose.model("Session", {
     phone: String,
     deviceId: String,
@@ -37,12 +35,9 @@ async function checkUserLimit() {
 
 let activeCodes = [];
 
-mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log("MongoDB connected"))
-.catch(err => console.log("DB ERROR:", err));
+.catch(err => console.log(err));
 
 app.post("/stk", async (req, res) => {
     try {

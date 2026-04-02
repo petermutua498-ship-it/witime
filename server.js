@@ -1,26 +1,167 @@
 require("dotenv").config();
+
 const express = require("express");
 const axios = require("axios");
 const mongoose = require("mongoose");
-const { duration } = require("moment");
+const moment = require("moment");
 const path = require("path");
 const cors = require("cors");
-const { error } = require("console");
 
 const app = express();
-const PORT = 3000;
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
+const PORT = process.env.port || 3000;
+
+mongoose.connect(process.env.MONGO_URL)
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.log(err));
+
 const Session = mongoose.model("Session", {
     phone: String,
     deviceId: String,
+    code: String,
     ip: String,
     active: Boolean,
     expiresAt: Date,
     speedlimit: Number
+});
+
+async function getAccessToken() {
+    const auth = Buffer.from(
+        process.env.CONSUMER_KEY + ":" + process.env.CONSUMER_SECRET
+    ).toString("base64"); 
+    const res = await axios.get (
+        "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+        {
+            headers: {
+                Authorization: 'Basic ${auth}'
+            }
+        }
+    );
+
+    return res.data.access_token;
+}
+
+function getPassword() {
+    const timestamp = moment().format("YYYYMMDDHHmmss");
+
+    const password = Buffer.from(
+        process.env.SHORTCODE + process.env.PASSKEY + timestamp
+    ).toString("base64");
+
+    return { password, timestamp };
+}
+
+async function sendSTK(phone, amount) {
+    const token = await getAccessToken();
+    const { password, timestamp } = getPassword();
+
+    const response = await axios.post(
+
+        "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+        {
+            BusinessShortCode: process.env.SHORTCODE,
+            password: process.env.PASSKEY,
+            Timestamp: timestamp,
+            TransactionType: "CustomerPayBillOnline",
+            Amount: amount,
+            PartyA: phone,
+            PartyB: process.env.SHORTCODE,
+            PhoneNumber: phone,
+            CallBackUrl: process.env.CALLBACK_URL,
+            AccountReference: "Witime",
+            TransactionDesc: "Internet Payment"
+        },
+        {
+            headers: { Authorization: 'Bearer ${token}'}
+        }
+    );
+
+    console.log("STK RESPONSE:", response.data);
+
+    return response.data;
+}
+
+app.post("/stk", async (req, res) => {
+    try {
+        const { phone, amount } = req.body;
+
+        const result = await sendSTK(phone, amount);
+
+        res.json(result);
+
+    } catch (err) {
+        console.log("STK ERROR:", err.response?.data || err.message);
+        res.status(500).json({ error: "STK failed" });
+    }
+
+});
+
+app.post("/callback", async (req, res) => {
+    try{
+        console.log("CALLBACK:", JSON.stringify(req.body, null, 2));
+
+      const data = req.body.Body.stkCallback;
+
+      if (data.ResultCode === 0) {
+        const items = data.CallbackMetadata.Item;
+
+        const phone = items.find(i => i.Name === "PhoneNumber").Value;
+
+        const allowed = await checkUserLimit();
+
+        if (!allowed) {
+            console.log("NETWORK FULL");
+            return res.json({ status: "full" });
+        }
+
+        const code = Math.floor(100000 + Math.random() * 900000);
+
+        const expiry = new Date(Date.now() + 60 * 60 * 1000);
+
+        await Session.create({
+            phone,
+            code,
+            active: true,
+            expiresAt: expiry,
+            speedlimit: 1000
+        });
+            
+        console.log("SUCCESS:", phone, "CODE:", code);
+    }
+
+    res.json({ ok:true });
+} catch (err) {
+    console.log("CALLBACK ERROR:", err.message);
+    res.json({ ok: false });
+}
+});
+
+app.post("/verify", async(req, res) => {
+    try {
+        const {phone, code} = req.body;
+        
+        const session = await Session.findOne({ 
+            phone, 
+            code,
+            active: true 
+        });
+        
+        if (!session) {
+            return re.json({status: "Invalid" });
+        }
+
+        if (session.expiresAt < new Date()) {
+            return res.json({ status: "expired"});
+        }
+
+        res.json({ status: "ok" });
+
+    } catch (err) {
+        res.json({ status: "error"});
+    }
 });
 
 const admin = mongoose.model("admin", {
@@ -35,62 +176,6 @@ async function checkUserLimit() {
 
 let activeCodes = [];
 
-mongoose.connect(process.env.MONGO_URL)
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
-
-app.post("/stk", async (req, res) => {
-    try {
-        const { phone, amount } = req.body;
-
-        console.log("PHONE:", phone);
-
-        const result = await sendSTK(phone, amount);
-
-        res.json(result);
-
-    } catch (err) {
-        console.log("STK ERROR:", err.message);
-        res.status(500).json({ error: "STK failed" });
-    }
-
-});
-
-app.post("/callback", async (req, res) => {
-    const data = req.body.Body.stkCallback;
-
-    if (data.ResultCode === 0) {
-        const items = data.CallbackMetadata.Item;
-
-        const phone = items.find(i => i.Name === "PhoneNumber").Value;
-
-        const allowed = await checkUserLimit();
-
-        if (!allowed) {
-            console.log("NETWORK FULL");
-            return res.json({ status: "full" });
-        }
-
-        await Session.findOneAndUpdate(
-            {phone},
-            {
-                phone,
-                active: true,
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-                speedlimit: 1000
-            },
-            { upsert: true }
-        );
-
-        console.log("SUCCESS:", phone);
-    }
-
-    res.json({ ok:true });
-});
-
-function generateCode(){
-    return Math.random().toString(36).substring(2,8).toUpperCase();
-}
 
 app.post("/auth", async (req, res) => {
     const {ip, deviceid} = req.body;
@@ -113,47 +198,6 @@ app.post("/auth", async (req, res) => {
 function bandwidthMiddleware(req, res, next) {
     res.setHeader("X-Bandwidth-Limit", "1000kbps");
     next();
-}
-
-async function stkPush(phone, amount) {
-    console.log("Sending STK to:", phone);
-
-    return {
-        success: true,
-        phone,
-        amount
-    };
-
-    const auth = await axios.get(process.env.DARAJA_TOKEN_URL, {
-        auth: {
-            username: process.env.CONSUMER_KEY,
-            password: process.env.CONSUMER_SECRET
-        }
-    });
-
-    const token = auth.data.access_token;
-
-    const response = await axios.post(
-        "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-        {
-            BusinessShortCode: 17439,
-            password: process.env.PASSKEY,
-            Timestamp: new Date().toISOString(),
-            TransactionType: "CustomerPayBillOnline",
-            Amount: 1,
-            PartyA: "2547xxxxxxxx",
-            PartyB: process.env.SHORTCODE,
-            PhoneNumber: 254708374149,
-            CallBackUrl: "https://witime-o2tz.onrender.com/callack",
-            AccountReference: "Witime",
-            TransactionDesc: "Internet"
-        },
-        {
-            headers: { Authorization: 'Bearer ${token}'}
-        }
-    );
-
-    return response.data;
 }
 
 const packages = {
@@ -230,24 +274,7 @@ app.post("/admin/login", async (req, res) => {
     res.json({ status: "ok"});
 });
 
-app.post("/verify", async(req, res) => {
-    try {
-        const {phone, code} = req.body;
-        
-        const session = await Session.findOne({ phone, code });
-        
-        if (!session) {
-            return re.json({status: "Invalid" });
-        }
 
-        session.active = true;
-        await session.save();
-
-        res.json({ status: "active" });
-    } catch {
-        res.status(500).json({error: error.message});
-    }
-});
 
 
 app.get("/status/:phone", async (req, res) => {

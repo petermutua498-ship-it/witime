@@ -48,7 +48,9 @@ function getPassword() {
     const timestamp = moment().format("YYYYMMDDHHmmss");
 
     const password = Buffer.from(
-        process.env.SHORTCODE + process.env.PASSKEY + timestamp
+        process.env.SHORTCODE + 
+        process.env.PASSKEY + 
+        timestamp
     ).toString("base64");
 
     return { password, timestamp };

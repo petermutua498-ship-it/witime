@@ -29,6 +29,22 @@ function generateCode() {
     return math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function formatPhone(phone) {
+    if(!phone) return null;
+
+    phone = phone.trim();
+
+    if (phone.startsWith("0")) {
+        return "254" + phone.substring(1);
+    }
+
+    if (phone.startsWith("+254")) {
+        return phone.replace("+", "");
+    }
+
+    return phone;
+}
+
 async function getAccessToken() {
     const auth = Buffer.from(
         process.env.CONSUMER_KEY + ":" + 
@@ -104,6 +120,20 @@ app.post("/stk", async (req, res) => {
             error: err.response?.data?.errorMessage || "STK failed"
         });
     }
+});
+
+app.post("/stk", async (req, res) => {
+    const { phone, amount } = req.body;
+
+    console.log("PHONE:", phone);
+
+    if (!phone) {
+        return res.json({ message: "Phone missing" });
+    }
+
+    setInterval(() => {
+        console.log("ping...");
+    }, 300000);
 });
 
 app.post("/callback", async (req, res) => {

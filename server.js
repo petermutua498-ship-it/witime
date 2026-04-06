@@ -92,6 +92,9 @@ app.post("/stk", async (req, res) => {
         );
 
         console.log("STK RESPONSE:", stk.data);
+
+        console.log("KEY:", process.env.CONSUMER_KEY);
+        console.log("SECRET:", process.env.CONSUMER_SECRET);
         
         res.json({
             message: stk.data.responseDescription || "Request sent"

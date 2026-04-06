@@ -67,6 +67,7 @@ app.post("/stk", async (req, res) => {
             timestamp
         ).toString("base64");
 
+        const phonenumber = "254708374149";
         
         const res = await axios.post(
             "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
@@ -76,7 +77,7 @@ app.post("/stk", async (req, res) => {
                 password: password,
                 Timestamp: timestamp,
                 TransactionType: "CustomerPayBillOnline",
-                Amount: amount,
+                Amount: "1",
                 PartyA: phone,
                 PartyB: 174379,
                 PhoneNumber: phone,

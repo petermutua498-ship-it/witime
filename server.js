@@ -110,6 +110,8 @@ app.post("/stk", async (req, res) => {
 });
 
 app.post("/stk", async (req, res) => {
+    console.log("ROUTE HIT");
+    
     const { phone, amount } = req.body;
 
     console.log("PHONE:", phone);

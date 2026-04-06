@@ -108,6 +108,13 @@ app.post("/stk", async (req, res) => {
         );
 
         console.log("STK RESPONSE:", stk.data);
+        
+        console.log({
+            key: process.env.CONSUMER_KEY,
+            secret: process.env.CONSUMER_SECRET,
+            shortcode: process.env.SHORTCODE,
+            passkey: process.env.PASSKEY?.slice(0,10)
+        }); 
 
         res.json({
             message: stk.data.responseDescription || "Request sent"
@@ -130,13 +137,6 @@ app.post("/stk", async (req, res) => {
     if (!phone) {
         return res.json({ message: "Phone missing" });
     }
-
-    console.log({
-        key: process.env.CONSUMER_KEY,
-        secret: process.env.CONSUMER_SECRET,
-        shortcode: process.env.SHORTCODE,
-        passkey: process.env.PASSKEY?.slice(0,10)
-    }); 
     
     setInterval(() => {
         console.log("ping...");

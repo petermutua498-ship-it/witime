@@ -29,22 +29,6 @@ function generateCode() {
     return math.floor(100000 + Math.random() * 900000).toString();
 }
 
-function formatPhone(phone) {
-    if(!phone) return null;
-
-    phone = phone.trim();
-
-    if (phone.startsWith("0")) {
-        return "254" + phone.substring(1);
-    }
-
-    if (phone.startsWith("+254")) {
-        return phone.replace("+", "");
-    }
-
-    return phone;
-}
-
 async function getAccessToken() {
     const auth = Buffer.from(
         process.env.CONSUMER_KEY + ":" + 
@@ -62,18 +46,6 @@ async function getAccessToken() {
     return res.data.access_token;
 }
 
-function getPassword() {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-
-    const password = Buffer.from(
-        process.env.SHORTCODE + 
-        process.env.PASSKEY + 
-        timestamp
-    ).toString("base64");
-
-    return { password, timestamp };
-}
-
 app.post("/stk", async (req, res) => {
     try {
         const { phone } = req.body;
@@ -83,21 +55,32 @@ app.post("/stk", async (req, res) => {
         }
         
         const token = await getAccessToken();
-        const { password, timestamp } = getPassword();
+
+        const timestamp = new Date ()
+        .toISOString()
+        .replace(/[-:TZ.]/g, "")
+        .slice(0, 14);
+
+        const password = Buffer.from(
+            process.env.SHORTCODE + 
+            process.env.PASSKEY + 
+            timestamp
+        ).toString("base64");
+
         
-        const stk = await axios.post(
+        const res = await axios.post(
             "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
             
             {
                 BusinessShortCode: process.env.SHORTCODE,
-                password: process.env.PASSKEY,
+                password: password,
                 Timestamp: timestamp,
                 TransactionType: "CustomerPayBillOnline",
                 Amount: amount,
                 PartyA: phone,
                 PartyB: process.env.SHORTCODE,
                 PhoneNumber: phone,
-                CallBackUrl: process.env.CALLBACK_URL,
+                CallBackUrl: process.env.HOST_URL + "/callback",
                 AccountReference: "Witime",
                 TransactionDesc: "Internet Payment"
             },
@@ -109,13 +92,6 @@ app.post("/stk", async (req, res) => {
 
         console.log("STK RESPONSE:", stk.data);
         
-        console.log({
-            key: process.env.CONSUMER_KEY,
-            secret: process.env.CONSUMER_SECRET,
-            shortcode: process.env.SHORTCODE,
-            passkey: process.env.PASSKEY?.slice(0,10)
-        }); 
-
         res.json({
             message: stk.data.responseDescription || "Request sent"
         });
@@ -141,6 +117,31 @@ app.post("/stk", async (req, res) => {
     setInterval(() => {
         console.log("ping...");
     }, 300000);
+});
+
+app.post("/pay", async (req, res) => {
+    try{
+        let { phone } = req.body;
+
+        if (!phone) return res.json({ error: "Phone required" });
+
+        phone = phone.replace(/^0/, "254");
+
+        console.log("PHONE:", phone);
+
+        const stk = await sendSTK(phone, 1);
+
+        res.json({
+            success:true,
+            message: "STK sent",
+            data: stk
+        });
+    } catch (err) {
+        res.json({
+            success: false,
+            error: err.errorMessage || "STK failed"
+        });
+    }
 });
 
 app.post("/callback", async (req, res) => {
@@ -206,6 +207,10 @@ app.post("/verify", async(req, res) => {
         res.json({ status: "error"});
     }
 });
+
+app.get("/ping", (req, res) => {
+    res.send("alive");
+})
 
 async function checkUserLimit() {
     const count = await Session.countDocuments({ active: true });

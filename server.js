@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 const path = require("path");
 const cors = require("cors");
-const { buffer } = require("stream/consumers");
+const { buffer } = require("buffer");
 
 const app = express();
 app.use(cors());

@@ -40,7 +40,7 @@ app.post("/pay", async (req, res) => {
             return res.json({ error: "Phone required" });
         }
 
-        phone = phone.replace(/^0/, "254");
+        phone = String(phone).trim();
 
         if(phone.startsWith("0")) {
             phone = "254" + phone.substring(1);

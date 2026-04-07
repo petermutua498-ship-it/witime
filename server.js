@@ -44,9 +44,12 @@ app.post("/pay", async (req, res) => {
 
         console.log("PHONE:", phone);
         
+        const consumerKey = "luesphuW8Qdo6vNSEbvAnOuvJOlDDc5vDe8V6pywUiHaCBqu";
+        const consumerSecret = "QfqAEvAtAUeEN8VwveaKkoZznWpiCWkfnuLeD5gOW94rOEm4GekcMmdBHpXYAHw8";
+
         const auth = Buffer.from(
-            process.env.CONSUMER_KEY + ":" + 
-            process.env.CONSUMER_SECRET
+            consumerKey + ":" + 
+            consumerSecret
         ).toString("base64");
         
         const tokenRes = await axios.get(

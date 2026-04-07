@@ -30,15 +30,6 @@ function generateCode() {
     return math.floor(100000 + Math.random() * 900000).toString();
 }
 
-app.get("/test-buffer", (req, res) => {
-    try{
-        const val = Buffer.from("hello").toString("base64");
-        res.send(val);
-    } catch (e) {
-        res.send("Buffer error: " + e.message);
-    }
-});
-
 app.post("/pay", async (req, res) => {
     console.log("ROUTE HIT");
     try{
@@ -47,6 +38,8 @@ app.post("/pay", async (req, res) => {
         if (!phone) {
             return res.json({ error: "Phone required" });
         }
+
+        phone = phone.replace(/^0/, "254");
 
         if(phonestartsWith("0")) {
             phone = "254" + phone.substring(1);
@@ -81,14 +74,14 @@ app.post("/pay", async (req, res) => {
 
         const timestamp = new Date()
         .toISOString()
-        .replace(/[^0-9]/g, '')
-        .slice(0, -3);
+        .replace(/[-:TZ.]/g, "")
+        .slice(0, 14);
 
         const password = Buffer.from(
             shortcode + passkey + timestamp
         ).toString("base64");
 
-        console.log("PASSWORD GENERATED");
+        console.log("PASSWORD READY");
 
         const stkRes = await axios.post(
             "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
@@ -119,6 +112,8 @@ app.post("/pay", async (req, res) => {
         });
 
     } catch (err) {
+        console.log("FULL ERROR:", err.response?.data || err.message);
+        
         res.json({
             success: false,
             error: err.errorMessage || "STK failed"
@@ -126,16 +121,7 @@ app.post("/pay", async (req, res) => {
     }
 });
 
-app.get("/debug-buffer", (req, res) => {
-    try{
-        const test = Buffer.from("test").toString("base64");
-        res.send("BUFFER OK: " + test);
-    } catch (e) {
-        res.send("BUFFER FAIL: " + e.message);
-    }
-});
-
-app.get("/debug-token", async (req, res) => {
+app.get("/stk", async (req, res) => {
     try{
         const { Buffer } = require("buffer");
 

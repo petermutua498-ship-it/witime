@@ -7,7 +7,7 @@ const moment = require("moment");
 const path = require("path");
 const cors = require("cors");
 global.Buffer = require("buffer").Buffer;
-const cors = require("cors");
+
 
 const app = express();
 app.use(cors());

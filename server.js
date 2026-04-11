@@ -51,7 +51,7 @@ app.post("/pay", async (req, res) => {
         const consumerKey = "luesphuW8Qdo6vNSEbvAnOuvJOlDDc5vDe8V6pywUiHaCBqu";
         const consumerSecret = "QfqAEvAtAUeEN8VwveaKkoZznWpiCWkfnuLeD5gOW94rOEm4GekcMmdBHpXYAHw8";
         const shortcode = "174379";
-        const passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
+        const passkey = "bfb279f9aa9bdbcf1582a8c4d7d6b8f2c3d8b4d3a0f6c4d2b1c6e0f2a5a7bb9c";
 
         const auth = Buffer.from(
             consumerKey + ":" + consumerSecret

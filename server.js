@@ -70,7 +70,10 @@ app.post("/pay", async (req, res) => {
         const token = tokenRes.data.access_token;
         console.log("TOKEN OK");
 
-        const date = new Date();
+        const date = new Date(
+            new Date().toLocaleString("en-US", { timeZone: "Africa/Nairobi" })
+        );
+        
         const timestamp = 
         date.getFullYear().toString() +
         String(date.getMonth() + 1).padStart(2, "0") +

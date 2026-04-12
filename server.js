@@ -48,8 +48,8 @@ app.post("/pay", async (req, res) => {
 
         console.log("PHONE:", phone);
         
-        const consumerKey = "luesphuW8Qdo6vNSEbvAnOuvJOlDDc5vDe8V6pywUiHaCBqu";
-        const consumerSecret = "QfqAEvAtAUeEN8VwveaKkoZznWpiCWkfnuLeD5gOW94rOEm4GekcMmdBHpXYAHw8";
+        const consumerKey = "GJVPwfSnXl0a1UmdAgeZarHHGZ8KV2SJ21aq8cM3istjxWFc";
+        const consumerSecret = "8XBR2wMkfUemAFPqFqXlyTtk3dug85xSWksAF6gRdIlXDogpKhrxG9p76YicS71b";
         const shortcode = "174379";
         const passkey = "bfb279f9aa9bdbcf1582a8c4d7d6b8f2c3d8b4d3a0f6c4d2b1c6e0f2a5a7bb9c";
 

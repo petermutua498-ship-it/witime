@@ -124,6 +124,24 @@ adminPages.forEach((page) => {
     });
 });
 
+// Render Express Backend Route
+app.get("/api/get-active-users", async (req, res) => {
+    try {
+        // Fetch all recent paid transactions that haven't expired
+        const activePaidUsers = await Payment.find({ status: "Paid" });
+
+        // Format as lightweight response
+        const userList = activePaidUsers.map(u => ({
+            phone: u.phone,
+            profile: u.packageProfile || "default"
+        }));
+
+        res.json({ users: userList });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ======================================
 // STATIC FILES & ROOT ROUTE
 // ======================================
@@ -196,6 +214,29 @@ app.get("/api/health", (req, res) => {
         service: "WiTime",
         time: new Date().toISOString()
     });
+});
+
+// ======================================
+// INTERNAL JOB QUEUE ROUTE FOR PAYMENTS
+// ======================================
+app.post("/api/router/add-job", (req, res) => {
+    const { phone, packageName } = req.body;
+
+    if (!phone) {
+        return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    if (!global.pendingJobs) {
+        global.pendingJobs = [];
+    }
+
+    const profile = packageName || "default";
+    const addCmd = `/ip hotspot user add name="${phone}" password="${phone}" profile="${profile}" comment="Paid via M-Pesa"`;
+    
+    global.pendingJobs.push(addCmd);
+    console.log(`📡 Queued MikroTik user creation command for ${phone}`);
+
+    res.json({ success: true, queueLength: global.pendingJobs.length });
 });
 
 // ======================================
@@ -364,16 +405,9 @@ setInterval(async () => {
             return;
         }
 
-       // Replace direct RouterOS API calls with HTTP job queue pushes
-if (!global.pendingJobs) {
-    global.pendingJobs = [];
-}
-
-// Ensure command is a plain string matching what /api/router/jobs expects
-const addCmd = `/ip hotspot user add name="${phone}" password="${phone}" profile="${packageName}" comment="Paid via M-Pesa"`;
-global.pendingJobs.push(addCmd);
-
-console.log(`📡 Queued MikroTik user creation for ${phone}`);
+        if (!global.pendingJobs) {
+            global.pendingJobs = [];
+        }
 
         for (const user of expiredUsers) {
             // Push RouterOS disconnect commands to the HTTP polling queue

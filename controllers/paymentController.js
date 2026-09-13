@@ -4,7 +4,6 @@ const mpesa = require("../services/mpesa");
 
 exports.pay = async (req, res) => {
     try {
-
         const {
             phone,
             packageName,
@@ -35,7 +34,7 @@ exports.pay = async (req, res) => {
                 Password: password,
                 Timestamp: timestamp,
                 TransactionType: "CustomerPayBillOnline",
-                Amount: 1,
+                Amount: 1, // Set to 'amount' when going live
                 PartyA: phone,
                 PartyB: process.env.MPESA_SHORTCODE,
                 PhoneNumber: phone,
@@ -51,151 +50,100 @@ exports.pay = async (req, res) => {
         );
 
         await Payment.create({
-
             phone,
-
             amount,
-
             packageName,
-
             packageDuration,
-
             checkoutRequestID: stk.data.CheckoutRequestID,
-
             merchantRequestID: stk.data.MerchantRequestID,
-
             status: "pending"
-
         });
 
         res.json({
             success: true
         });
 
-        console.log({
-    shortcode: process.env.MPESA_SHORTCODE,
-    phone,
-    amount,
-    callback: process.env.HOST_URL + "/callback"
-});
-
     } catch (err) {
-
         console.error(err.response?.data || err);
-
         res.status(500).json({
             success: false,
             message: "Payment request failed."
         });
-
     }
-
 };
 
 exports.callback = async (req, res) => {
-
     try {
-
-        const callback =
-            req.body?.Body?.stkCallback;
+        const callback = req.body?.Body?.stkCallback;
 
         if (!callback) {
-
-            console.log(
-                "[M-Pesa] Invalid callback."
-            );
-
-            return res.status(200).json({
-                ResultCode: 0,
-                ResultDesc: "Accepted"
-            });
+            console.log("[M-Pesa] Invalid callback format received.");
+            return res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
         }
 
-        const {
+        const { ResultCode, ResultDesc, CheckoutRequestID } = callback;
+
+        console.log("[M-Pesa Callback Received]", {
             ResultCode,
             ResultDesc,
             CheckoutRequestID
-        } = callback;
+        });
 
-        console.log(
-            "[M-Pesa Callback]",
-            {
-                ResultCode,
-                ResultDesc,
-                CheckoutRequestID
-            }
-        );
-
-        const payment =
-            await Payment.findOne({
-                checkoutRequestID:
-                    CheckoutRequestID
-            });
+        const payment = await Payment.findOne({ checkoutRequestID: CheckoutRequestID });
 
         if (!payment) {
-
-            console.log(
-                "[M-Pesa] Payment not found:",
-                CheckoutRequestID
-            );
-
-            return res.status(200).json({
-                ResultCode: 0,
-                ResultDesc: "Accepted"
-            });
+            console.log("[M-Pesa] Payment record not found:", CheckoutRequestID);
+            return res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
         }
 
-        // PAYMENT SUCCESS
-        // Inside exports.callback when ResultCode === 0:
-// Replace direct MikroTik creation in your callback/verify route with queued jobs:
-if (paymentSuccess) {
-    // 1. Update database user status
-    user.status = "Paid";
-    user.loginTime = new Date();
-    user.expiryTime = new Date(Date.now() + durationInMs);
-    await user.save();
+        // 1. Evaluate Safaricom Payment Success (ResultCode === 0)
+        if (ResultCode === 0) {
+            // Parse duration string (e.g., "1 Hour", "24 Hours", "7 Days") into milliseconds
+            let durationInMs = 3600 * 1000; // Default 1 Hour
+            const durationStr = (payment.packageDuration || "").toLowerCase();
 
-    // 2. Push MikroTik creation commands to the HTTP polling queue
-    // NEW / FIXED BLOCK:
-console.log(`🔵 Queuing MikroTik user creation for local router polling: ${phone}`);
+            if (durationStr.includes("min")) {
+                const mins = parseInt(durationStr) || 30;
+                durationInMs = mins * 60 * 1000;
+            } else if (durationStr.includes("hour")) {
+                const hours = parseInt(durationStr) || 1;
+                durationInMs = hours * 3600 * 1000;
+            } else if (durationStr.includes("day")) {
+                const days = parseInt(durationStr) || 1;
+                durationInMs = days * 24 * 3600 * 1000;
+            }
 
-if (!global.pendingJobs) {
-    global.pendingJobs = [];
-}
+            // 2. Update DB Payment Status
+            payment.status = "Paid";
+            payment.loginTime = new Date();
+            payment.expiryTime = new Date(Date.now() + durationInMs);
+            await payment.save();
 
-// Build the raw RouterOS command string
-const routerCommand = `/ip hotspot user add name="${phone}" password="${phone}" profile="${packageName}" comment="Paid via M-Pesa"`;
+            // 3. Queue MikroTik Hotspot User Creation Command
+            console.log(`🔵 Queuing MikroTik user creation for local router polling: ${payment.phone}`);
 
-// Push directly to pending jobs queue
-global.pendingJobs.push(routerCommand);
+            if (!global.pendingJobs) {
+                global.pendingJobs = [];
+            }
 
-console.log(`📡 Queued command for MikroTik: ${routerCommand}`);
-}
+            // Build RouterOS CLI command (Uses default profile if specific profile not defined)
+            const routerCommand = `/ip hotspot user add name="${payment.phone}" password="${payment.phone}" comment="Paid_MPesa_${payment.packageName}"`;
 
-        return res.status(200).json({
+            global.pendingJobs.push(routerCommand);
 
-            ResultCode: 0,
+            console.log(`📡 Queued command for MikroTik: ${routerCommand}`);
+        } else {
+            // Payment cancelled or failed on user phone
+            payment.status = "Failed";
+            await payment.save();
+            console.log(`🔴 Payment failed or cancelled for ${payment.phone}: ${ResultDesc}`);
+        }
 
-            ResultDesc: "Accepted"
-
-        });
+        // Always return 200 OK to Safaricom
+        return res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
 
     } catch (error) {
-
-        console.error(
-            "[M-Pesa Callback Error]:",
-            error
-        );
-
-        return res.status(200).json({
-
-            ResultCode: 0,
-
-            ResultDesc: "Accepted"
-
-        });
-
+        console.error("[M-Pesa Callback Error]:", error);
+        return res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
     }
-
 };
-

@@ -56,7 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!hasLoggedIntoMikrotik) {
                     hasLoggedIntoMikrotik = true;
-                    submitMikrotikAndVerify(data.expiryTime);
+                    // FIX: Trigger login form submission directly
+                    submitMikrotikCredentials(data.expiryTime);
                 }
 
             } else if (data.status === "Expired") {
@@ -70,91 +71,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 2. Submit credentials to MikroTik Hotspot
-    function submitMikrotikCredentials() {
-    const statusElement = document.getElementById("status");
-    if (statusElement) statusElement.innerText = "Authenticating with Wi-Fi...";
-
-    const linkLogin = params.get("link-login-only") || `http://${routerIp}/login`;
-
-    // Direct form submission to local hotspot gateway
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = linkLogin;
-
-    // Send username & password
-    const user = document.createElement("input");
-    user.type = "hidden";
-    user.name = "username";
-    user.value = phone;
-    form.appendChild(user);
-
-    const pass = document.createElement("input");
-    pass.type = "hidden";
-    pass.name = "password";
-    pass.value = phone;
-    form.appendChild(pass);
-
-    // Redirect back to connected page upon successful MikroTik auth
-    const dst = document.createElement("input");
-    dst.type = "hidden";
-    dst.name = "dst";
-    dst.value = window.location.href;
-    form.appendChild(dst);
-
-    document.body.appendChild(form);
-    form.submit();
-}
-
-    // 3. Verify actual network flow through MikroTik before starting timer
-    function verifyNetworkAccess(expiryTime) {
-        let attempts = 0;
-        const maxAttempts = 12;
+    function submitMikrotikCredentials(expiryTime) {
         const statusElement = document.getElementById("status");
+        if (statusElement) statusElement.innerText = "Authenticating with Wi-Fi...";
 
-        const checkInterval = setInterval(async () => {
-            attempts++;
-            if (statusElement) {
-                statusElement.innerText = `Connecting (${attempts}s)...`;
-            }
+        const linkLogin = params.get("link-login-only") || `http://${routerIp}/login`;
 
-            try {
-                // Ping external live health route through MikroTik hotspot gate
-                const res = await fetch("https://witime-o2tz.onrender.com/api/health?cachebust=" + Date.now(), {
-                    mode: "cors",
-                    cache: "no-store"
-                });
+        // Direct form submission to local hotspot gateway
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = linkLogin;
 
-                if (res.ok) {
-                    clearInterval(checkInterval);
+        // Send username & password
+        const user = document.createElement("input");
+        user.type = "hidden";
+        user.name = "username";
+        user.value = phone;
+        form.appendChild(user);
 
-                    // Network confirmed! Set status to Connected & launch timer
-                    if (statusElement) statusElement.innerText = "Connected";
+        const pass = document.createElement("input");
+        pass.type = "hidden";
+        pass.name = "password";
+        pass.value = phone;
+        form.appendChild(pass);
 
-                    if (expiryTime) {
-                        startTimerFromExpiry(new Date(expiryTime));
-                    } else {
-                        startTimerFromSeconds(3600);
-                    }
-                }
-            } catch (err) {
-                console.log("Waiting for MikroTik gateway to open internet pass...", err);
-            }
+        // Append expiryTime as query param so page can render timer after redirect
+        let redirectUrl = window.location.href;
+        if (expiryTime && !redirectUrl.includes("expiryTime=")) {
+            const separator = redirectUrl.includes("?") ? "&" : "?";
+            redirectUrl += `${separator}expiryTime=${encodeURIComponent(expiryTime)}`;
+        }
 
-            // Fallback: If 12 seconds pass, assume local connection active and start timer
-            if (attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                if (statusElement) statusElement.innerText = "Connected";
+        const dst = document.createElement("input");
+        dst.type = "hidden";
+        dst.name = "dst";
+        dst.value = redirectUrl;
+        form.appendChild(dst);
 
-                if (expiryTime) {
-                    startTimerFromExpiry(new Date(expiryTime));
-                } else {
-                    startTimerFromSeconds(3600);
-                }
-            }
-        }, 1000);
+        document.body.appendChild(form);
+        form.submit();
     }
 
-    // 4. Countdown Engine
+    // 3. Countdown Engine
+    const expiryFromQuery = params.get("expiryTime");
+    if (expiryFromQuery) {
+        const statusElement = document.getElementById("status");
+        if (statusElement) statusElement.innerText = "Connected";
+        startTimerFromExpiry(new Date(expiryFromQuery));
+    } else {
+        startStatusPolling();
+    }
+
     function startTimerFromExpiry(expiryDate) {
         if (countdownInterval) clearInterval(countdownInterval);
 
@@ -169,23 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const totalSeconds = Math.floor(diff / 1000);
             displayTime(totalSeconds);
-        }
-
-        tick();
-        countdownInterval = setInterval(tick, 1000);
-    }
-
-    function startTimerFromSeconds(initialSeconds) {
-        if (countdownInterval) clearInterval(countdownInterval);
-        let secondsLeft = initialSeconds;
-
-        function tick() {
-            if (secondsLeft <= 0) {
-                renderExpiredState();
-                return;
-            }
-            displayTime(secondsLeft);
-            secondsLeft--;
         }
 
         tick();
@@ -215,9 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusElement = document.getElementById("status");
         if (statusElement) statusElement.innerText = "Expired";
     }
-
-    // Start execution by polling payment status
-    startStatusPolling();
 });
 
 function buyMore() {

@@ -434,6 +434,20 @@ setInterval(async () => {
     }
 }, 30 * 1000);
 
+// Route for MikroTik script to poll pending RouterOS commands
+app.get("/api/mikrotik/jobs", (req, res) => {
+    if (!global.pendingJobs || global.pendingJobs.length === 0) {
+        return res.send(""); // Return empty string if no pending jobs
+    }
+
+    // Join commands with newlines and clear the queue
+    const commandsToRun = global.pendingJobs.join("\n");
+    global.pendingJobs = [];
+
+    console.log("🚀 Dispatching queued commands to MikroTik router");
+    res.send(commandsToRun);
+});
+
 // ======================================
 // KEEP ALIVE
 // ======================================

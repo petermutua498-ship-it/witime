@@ -27,6 +27,25 @@ mongoose
 app.use("/api", paymentRoutes);
 
 // --------------------------------------------------
+// PACKAGES ENDPOINT (Fixes "Unable to load packages")
+// --------------------------------------------------
+app.get("/api/packages", async (req, res) => {
+    try {
+        // Return active packages to frontend
+        const packages = [
+            { id: "1", name: "Wi-Fi Package", price: "Ksh 10", duration: "1 Hour" },
+            { id: "2", name: "Wi-Fi Package", price: "Ksh 20", duration: "3 Hours" },
+            { id: "3", name: "Wi-Fi Package", price: "Ksh 50", duration: "24 Hours" }
+        ];
+
+        res.json({ success: true, packages });
+    } catch (error) {
+        console.error("Error fetching packages:", error);
+        res.status(500).json({ success: false, message: "Unable to load packages." });
+    }
+});
+
+// --------------------------------------------------
 // MIKROTIK INTEGRATION ENDPOINTS
 // --------------------------------------------------
 
@@ -95,4 +114,4 @@ app.get("*", (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-}); 
+});

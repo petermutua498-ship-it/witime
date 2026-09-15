@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
-const paymentRoutes = require("./routes/paymentRoutes"); // Ensure path matches your structure
+const paymentRoutes = require("./routes/paymentRoutes"); // Ensure path matches your project structure
 const Payment = require("./models/Payment");
 
 const app = express();
@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Global pending jobs array for MikroTik polling
+// Global pending jobs queue for MikroTik router polling
 global.pendingJobs = global.pendingJobs || [];
 
 // Database Connection
@@ -23,39 +23,47 @@ mongoose
     .then(() => console.log("MongoDB Connected Successfully"))
     .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// API Routes
-app.use("/api", paymentRoutes);
+// --------------------------------------------------
+// 1. PACKAGES ENDPOINT (Fixes "Unable to load packages")
+// --------------------------------------------------
+app.get("/api/packages", (req, res) => {
+    // Serves the pricing options loaded by index.html / script.js
+    const packages = [
+        { id: "1", name: "30 Mins", price: "Ksh 10", duration: "30 Mins" },
+        { id: "2", name: "1 Hour", price: "Ksh 20", duration: "1 Hour" },
+        { id: "3", name: "24 Hours", price: "Ksh 50", duration: "24 Hours" }
+    ];
+
+    res.json({ success: true, packages });
+});
 
 // --------------------------------------------------
-// MIKROTIK INTEGRATION ENDPOINTS
+// 2. MIKROTIK POLLING & SYNC ENDPOINTS
 // --------------------------------------------------
 
-// 1. Endpoint polled by MikroTik router scheduler (fetchJobs)
+// Polled by MikroTik router scheduler (fetchJobs) to grab pending CLI commands
 app.get("/api/mikrotik/jobs", (req, res) => {
     if (!global.pendingJobs || global.pendingJobs.length === 0) {
-        return res.send(""); // Return empty string if no pending jobs
+        return res.send("");
     }
 
-    // Join pending CLI commands with newlines and clear the queue
     const commandsToRun = global.pendingJobs.join("\n");
     global.pendingJobs = [];
 
-    console.log("🚀 Dispatching queued commands to MikroTik router:\n" + commandsToRun);
+    console.log("🚀 Dispatching queued commands to MikroTik:\n" + commandsToRun);
     res.type("text/plain").send(commandsToRun);
 });
 
-// 2. Endpoint polled by frontend JS to verify if user creation job was fetched by MikroTik
+// Polled by frontend JS to verify if MikroTik has fetched the user creation command
 app.get("/api/user-ready/:phone", (req, res) => {
     const { phone } = req.params;
-
-    // Check if there are still pending jobs in the queue for this phone number
     const isPending = global.pendingJobs && global.pendingJobs.some((cmd) => cmd.includes(phone));
 
-    // If the job is no longer in pendingJobs, MikroTik has successfully fetched it
+    // Returns ready: true once MikroTik has polled and cleared the pending job
     res.json({ ready: !isPending });
 });
 
-// 3. Endpoint polled by frontend JS to check connection status and timestamps
+// Polled by frontend JS to check connection status and timestamps
 app.get("/api/connected/:phone", async (req, res) => {
     try {
         const { phone } = req.params;
@@ -83,16 +91,18 @@ app.get("/api/health", (req, res) => {
 });
 
 // --------------------------------------------------
-// STATIC FILE SERVING
+// 3. MOUNT PAYMENT ROUTES & STATIC FILES
 // --------------------------------------------------
+app.use("/api", paymentRoutes);
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Server Initialization
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-}); 
+    console.log(`WiTime Server running on port ${PORT}`);
+});

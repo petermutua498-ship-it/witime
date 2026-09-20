@@ -38,7 +38,7 @@ exports.pay = async (req, res) => {
                 PartyA: phone,
                 PartyB: process.env.MPESA_SHORTCODE,
                 PhoneNumber: phone,
-                CallBackURL: "https://witime-o2tz.onrender.com/callback",
+                CallBackURL: "https://witime-amu1.onrender.com/callback",
                 AccountReference: packageName,
                 TransactionDesc: packageDuration
             },

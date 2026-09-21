@@ -4,7 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-
+const Payment = require("./models/Payment");
 // Routes
 const paymentRoutes = require("./routes/paymentRoutes");
 const packageRoutes = require("./routes/packageRoutes");

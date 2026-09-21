@@ -141,7 +141,7 @@ payBtn.onclick = async function () {
 
     try {
 
-        const response = await fetch("/pay", {
+        const response = await fetch("/api/pay", {
 
             method: "POST",
 

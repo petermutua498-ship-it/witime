@@ -3,7 +3,8 @@ const router = express.Router();
 
 const paymentController = require("../controllers/paymentController");
 
-// Customer STK Push
 router.post("/pay", paymentController.pay);
+
+router.post("/callback", paymentController.callback);
 
 module.exports = router;

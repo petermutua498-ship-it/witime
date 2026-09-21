@@ -56,6 +56,61 @@ app.get("/api/mikrotik/jobs", (req, res) => {
     res.type("text/plain").send(commandsToRun);
 });
 
+app.get("/api/check-payment/:phone", async (req, res) => {
+
+    try {
+
+        const phone = req.params.phone;
+
+        const payment = await Payment.findOne({
+            phone: phone
+        }).sort({
+            createdAt: -1
+        });
+
+        if (!payment) {
+
+            return res.json({
+                status: "NotFound"
+            });
+
+        }
+
+        res.json({
+
+            status: payment.status,
+
+            phone: payment.phone,
+
+            packageName: payment.packageName,
+
+            amount: payment.amount,
+
+            loginTime: payment.loginTime,
+
+            expiryTime: payment.expiryTime
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Check payment error:",
+            error
+        );
+
+        res.status(500).json({
+
+            status: "Error",
+
+            message: "Unable to check payment."
+
+        });
+
+    }
+
+});
+
 // --------------------------------------------------
 // HEALTH CHECK
 // --------------------------------------------------

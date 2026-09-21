@@ -114,26 +114,37 @@ window.selectPackage = function(name, price, duration) {
 
 }; 
 
-// --------------------------
+// ==========================
 // Pay Button
-// --------------------------
+// ==========================
 
 payBtn.onclick = async function () {
 
     let phone = phoneInput.value.trim();
 
     if (!phone) {
-
         alert("Enter phone number.");
-
         return;
-
     }
 
+    // Convert 07XXXXXXXX to 2547XXXXXXXX
     if (phone.startsWith("07")) {
-
         phone = "254" + phone.substring(1);
+    }
 
+    // Convert +2547XXXXXXXX to 2547XXXXXXXX
+    if (phone.startsWith("+254")) {
+        phone = phone.substring(1);
+    }
+
+    if (!/^254[17]\d{8}$/.test(phone)) {
+        alert("Enter a valid Kenyan phone number.");
+        return;
+    }
+
+    if (!currentPackage) {
+        alert("Please select a package.");
+        return;
     }
 
     payBtn.disabled = true;
@@ -146,14 +157,12 @@ payBtn.onclick = async function () {
             method: "POST",
 
             headers: {
-
                 "Content-Type": "application/json"
-
             },
 
             body: JSON.stringify({
 
-                phone,
+                phone: phone,
 
                 packageName: currentPackage.name,
 
@@ -165,43 +174,140 @@ payBtn.onclick = async function () {
 
         });
 
-        const data = await response.json();
+        // Prevent HTML 404 pages from causing JSON errors
+        const text = await response.text();
 
-        if (!data.success) {
+        let data;
 
-            alert(data.message);
+        try {
+            data = JSON.parse(text);
+        } catch (jsonError) {
 
-            payBtn.disabled = false;
-            payBtn.innerText = "Pay with M-Pesa";
+            console.error(
+                "Server returned non-JSON:",
+                text
+            );
 
-            return;
+            throw new Error(
+                `Server returned ${response.status}`
+            );
+        }
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Payment request failed."
+            );
 
         }
+
+        // --------------------------
+        // STK SENT
+        // --------------------------
 
         paymentSection.style.display = "none";
 
         waitingSection.style.display = "block";
 
+        payBtn.disabled = false;
+        payBtn.innerText = "Pay with M-Pesa";
+
+        // Clear previous timer
+        if (timer) {
+            clearInterval(timer);
+        }
+
+        // --------------------------
+        // CHECK PAYMENT
+        // --------------------------
+
         timer = setInterval(async () => {
 
-            const r = await fetch(`/check-payment/${phone}`);
+            try {
 
-            const result = await r.json();
+                const r = await fetch(
+                    `/api/check-payment/${encodeURIComponent(phone)}`,
+                    {
+                        cache: "no-store"
+                    }
+                );
 
-            if (result.status === "success") {
+                const resultText =
+                    await r.text();
 
-                clearInterval(timer);
+                let result;
 
-                waitingSection.style.display = "none";
+                try {
+                    result = JSON.parse(resultText);
+                } catch (e) {
 
-                successSection.style.display = "block";
+                    console.error(
+                        "Invalid payment status response:",
+                        resultText
+                    );
 
-                setTimeout(() => {
+                    return;
+                }
 
-                    window.location.href =
-                        `/connected.html?phone=${phone}`;
+                console.log(
+                    "Payment status:",
+                    result
+                );
 
-                }, 2000);
+                if (
+                    result.status === "Paid" ||
+                    result.status === "success" ||
+                    result.status === "Success"
+                ) {
+
+                    clearInterval(timer);
+
+                    waitingSection.style.display =
+                        "none";
+
+                    successSection.style.display =
+                        "block";
+
+                    setTimeout(() => {
+
+                        window.location.href =
+                            `/connected.html?phone=${encodeURIComponent(phone)}`;
+
+                    }, 2000);
+
+                }
+
+                if (
+                    result.status === "Failed" ||
+                    result.status === "failed"
+                ) {
+
+                    clearInterval(timer);
+
+                    waitingSection.style.display =
+                        "none";
+
+                    paymentSection.style.display =
+                        "block";
+
+                    alert(
+                        "Payment was cancelled or failed."
+                    );
+
+                    payBtn.disabled = false;
+
+                    payBtn.innerText =
+                        "Pay with M-Pesa";
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Payment checking error:",
+                    error
+                );
 
             }
 
@@ -209,12 +315,20 @@ payBtn.onclick = async function () {
 
     } catch (err) {
 
-        console.log(err);
+        console.error(
+            "Payment error:",
+            err
+        );
 
-        alert("Unable to contact server.");
+        alert(
+            err.message ||
+            "Unable to contact server."
+        );
 
         payBtn.disabled = false;
-        payBtn.innerText = "Pay with M-Pesa";
+
+        payBtn.innerText =
+            "Pay with M-Pesa";
 
     }
 

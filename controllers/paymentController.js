@@ -64,12 +64,17 @@ exports.pay = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err.response?.data || err);
-        res.status(500).json({
-            success: false,
-            message: "Payment request failed."
-        });
-    }
+    console.error("[WiTime M-Pesa Error]", {
+        message: err.message,
+        status: err.response?.status,
+        response: err.response?.data,
+        url: err.config?.url
+    });
+
+    res.status(500).json({
+        success: false,
+        message: "Payment request failed. Check server logs."
+    });
 };
 
 exports.callback = async (req, res) => {

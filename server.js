@@ -19,18 +19,25 @@ app.use(express.urlencoded({ extended: true }));
 // Global queue for MikroTik router polling
 global.pendingJobs = global.pendingJobs || [];
 
-// Database Connection
-mongoose
-    .connect(
-        process.env.MONGO_URI ||
-        "mongodb://127.0.0.1:27017/witime"
-    )
-    .then(() => {
-        console.log("MongoDB Connected Successfully");
-    })
-    .catch((err) => {
-        console.error("MongoDB Connection Error:", err);
+// --------------------------------------------------
+// DATABASE CONNECTION
+// --------------------------------------------------
+
+async function connectDatabase() {
+    const mongoUri = process.env.MONGO_URI;
+
+    if (!mongoUri) {
+        throw new Error(
+            "MONGO_URI is missing from environment variables."
+        );
+    }
+
+    await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 10000
     });
+
+    console.log("MongoDB Connected Successfully");
+}
 
 // --------------------------------------------------
 // MIKROTIK POLLING ENDPOINT
@@ -152,8 +159,23 @@ app.get("*", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(
-        `WiTime Server running on port ${PORT}`
-    );
-});
+async function startServer() {
+    try {
+        await connectDatabase();
+
+        app.listen(PORT, () => {
+            console.log(
+                `WiTime Server running on port ${PORT}`
+            );
+        });
+    } catch (err) {
+        console.error(
+            "WiTime startup failed:",
+            err.message
+        );
+
+        process.exit(1);
+    }
+}
+
+startServer();

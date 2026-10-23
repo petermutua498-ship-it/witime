@@ -12,7 +12,7 @@ exports.pay = async (req, res) => {
         } = req.body;
 
         const token = await mpesa.getAccessToken();
-        console.log("Access Token:", token);
+        
 
         const timestamp = new Date()
             .toISOString()

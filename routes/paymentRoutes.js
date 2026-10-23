@@ -4,7 +4,6 @@ const router = express.Router();
 const paymentController = require("../controllers/paymentController");
 
 router.post("/pay", paymentController.pay);
-
-router.post("/callback", paymentController.callback);
+router.post("/apicallback", paymentController.callback);
 
 module.exports = router;

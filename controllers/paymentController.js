@@ -71,10 +71,11 @@ exports.pay = async (req, res) => {
         url: err.config?.url
     });
 
-    res.status(500).json({
+        res.status(500).json({
         success: false,
         message: "Payment request failed. Check server logs."
     });
+    }
 };
 
 exports.callback = async (req, res) => {
@@ -151,4 +152,5 @@ exports.callback = async (req, res) => {
         console.error("[M-Pesa Callback Error]:", error);
         return res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
     }
+
 };

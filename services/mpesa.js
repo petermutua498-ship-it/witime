@@ -6,38 +6,57 @@ const BASE_URL =
         ? "https://api.safaricom.co.ke"
         : "https://sandbox.safaricom.co.ke";
 
+const http = axios.create({
+    timeout: 20000,
+    headers: {
+        "Content-Type": "application/json"
+    }
+});
+
+
 async function getAccessToken() {
-    const key = process.env.MPESA_CONSUMER_KEY;
-    const secret = process.env.MPESA_CONSUMER_SECRET;
+    const key = process.env.MPESA_CONSUMER_KEY?.trim();
+    const secret = process.env.MPESA_CONSUMER_SECRET?.trim();
 
     if (!key || !secret) {
         throw new Error(
-            "Missing M-Pesa consumer key or secret."
+            `Missing Daraja credentials. ` +
+            `Consumer key present: ${Boolean(key)}; ` +
+            `Consumer secret present: ${Boolean(secret)}`
         );
     }
 
-    const auth = Buffer.from(
-        `${key}:${secret}`
-    ).toString("base64");
+    const auth = Buffer.from(`${key}:${secret}`).toString("base64");
 
-    const response = await axios.get(
-        `${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
-        {
-            headers: {
-                Authorization: `Basic ${auth}`
-            },
-            timeout: 15000
-        }
-    );
+    try {
+        const response = await axios.get(
+            "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+            {
+                headers: {
+                    Authorization: `Basic ${auth}`,
+                    Accept: "application/json"
+                },
+                timeout: 15000
+            }
+        );
 
-    if (!response.data?.access_token) {
+        return response.data.access_token;
+    } catch (error) {
+        console.error("[WiTime OAuth Error]", {
+            status: error.response?.status,
+            data: error.response?.data ?? error.message,
+            consumerKeyPresent: Boolean(key),
+            consumerSecretPresent: Boolean(secret)
+        });
+
         throw new Error(
-            "Safaricom did not return an access token."
+            `M-Pesa OAuth failed with HTTP ${
+                error.response?.status ?? "network error"
+            }.`
         );
     }
-
-    return response.data.access_token;
 }
+
 
 function getTimestamp() {
     const parts = new Intl.DateTimeFormat("en-GB", {
@@ -74,40 +93,52 @@ async function querySTK(checkoutRequestID) {
         throw new Error("CheckoutRequestID is required.");
     }
 
-    const token = await getAccessToken();
-    const timestamp = getTimestamp();
-
-    const shortcode = process.env.MPESA_SHORTCODE;
-    const passkey = process.env.MPESA_PASSKEY;
+    const shortcode = process.env.MPESA_SHORTCODE?.trim();
+    const passkey = process.env.MPESA_PASSKEY?.trim();
 
     if (!shortcode || !passkey) {
         throw new Error(
-            "Missing M-Pesa shortcode or passkey."
+            "Missing MPESA_SHORTCODE or MPESA_PASSKEY."
         );
     }
+
+    const token = await getAccessToken();
+    const timestamp = getTimestamp();
 
     const password = Buffer.from(
         `${shortcode}${passkey}${timestamp}`
     ).toString("base64");
 
-    const response = await axios.post(
-        `${BASE_URL}/mpesa/stkpushquery/v1/query`,
-        {
-            BusinessShortCode: shortcode,
-            Password: password,
-            Timestamp: timestamp,
-            CheckoutRequestID: checkoutRequestID
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            timeout: 20000
-        }
-    );
+    const url = `${BASE_URL}/mpesa/stkpushquery/v1/query`;
 
-    return response.data;
+    try {
+        const response = await http.post(
+            url,
+            {
+                BusinessShortCode: shortcode,
+                Password: password,
+                Timestamp: timestamp,
+                CheckoutRequestID: checkoutRequestID
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error("[WiTime STK Query Error]", {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data || null
+        });
+
+        throw new Error(
+            `M-Pesa STK query failed (${error.response?.status || "network error"}).`
+        );
+    }
 }
 
 module.exports = {

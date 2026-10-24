@@ -122,8 +122,8 @@ exports.pay = async (req, res) => {
                 PartyB: shortcode,
                 PhoneNumber: normalizedPhone,
                 CallBackURL: callbackUrl,
-                AccountReference: String(packageName).slice(0, 12),
-                TransactionDesc: String(packageDuration).slice(0, 20)
+                AccountReference: "WiTime Internet",
+                TransactionDesc: packageName || "WiTime Hotspot"
             },
             {
                 headers: {

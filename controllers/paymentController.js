@@ -1,5 +1,6 @@
 const axios = require("axios");
 const Payment = require("../models/Payment");
+const Job = require("../models/Job"); 
 const mpesa = require("../services/mpesa");
 
 exports.pay = async (req, res) => {
@@ -12,8 +13,7 @@ exports.pay = async (req, res) => {
         } = req.body;
 
         const token = await mpesa.getAccessToken();
-        console.log("Access Token:", token);
-
+       
         const timestamp = new Date()
             .toISOString()
             .replace(/[-:.TZ]/g, "")
@@ -38,7 +38,7 @@ exports.pay = async (req, res) => {
                 PartyA: phone,
                 PartyB: process.env.MPESA_SHORTCODE,
                 PhoneNumber: phone,
-                CallBackURL: "https://witime.vercel.app/apicallback",
+                CallBackURL: "https://witime.vercel.app/api/callback", // 👈 Fixed missing slash in URL
                 AccountReference: packageName,
                 TransactionDesc: packageDuration
             },
@@ -98,7 +98,6 @@ exports.callback = async (req, res) => {
 
         // 1. Evaluate Safaricom Payment Success (ResultCode === 0)
         if (ResultCode === 0) {
-            // Parse duration string (e.g., "1 Hour", "24 Hours", "7 Days") into milliseconds
             let durationInMs = 3600 * 1000; // Default 1 Hour
             const durationStr = (payment.packageDuration || "").toLowerCase();
 
@@ -119,19 +118,18 @@ exports.callback = async (req, res) => {
             payment.expiryTime = new Date(Date.now() + durationInMs);
             await payment.save();
 
-            // 3. Queue MikroTik Hotspot User Creation Command
-            console.log(`🔵 Queuing MikroTik user creation for local router polling: ${payment.phone}`);
+            // 3. Queue MikroTik Hotspot User Creation Command to MongoDB (Vercel Safe!)
+            console.log(`🔵 Queuing MikroTik user creation in MongoDB for router polling: ${payment.phone}`);
 
-            if (!global.pendingJobs) {
-                global.pendingJobs = [];
-            }
-
-            // Build RouterOS CLI command (Uses default profile if specific profile not defined)
             const routerCommand = `/ip hotspot user add name="${payment.phone}" password="${payment.phone}" comment="Paid_MPesa_${payment.packageName}"`;
 
-            global.pendingJobs.push(routerCommand);
+            // Save directly to MongoDB database so Vercel doesn't lose it
+            await Job.create({
+                command: routerCommand,
+                status: "pending"
+            });
 
-            console.log(`📡 Queued command for MikroTik: ${routerCommand}`);
+            console.log(`📡 Queued job in MongoDB: ${routerCommand}`);
         } else {
             // Payment cancelled or failed on user phone
             payment.status = "Failed";

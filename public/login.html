@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | WiTime Billing</title>
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-card">
+      <a class="brand" href="/login.html" aria-label="WiTime Billing home">
+        <img src="/images/logo.png" alt="WiTime logo"
+             onerror="this.style.display='none'" />
+        <span>WiTime <small>Billing System</small></span>
+      </a>
+
+      <div class="auth-heading">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1>Log in to WiTime</h1>
+        <p>Manage your hotspot, packages and payments.</p>
+      </div>
+
+      <form id="loginForm">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email"
+               placeholder="you@example.com" autocomplete="email" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password"
+               placeholder="Enter your password"
+               autocomplete="current-password" required />
+
+        <p id="message" class="message" role="alert"></p>
+
+        <button id="loginButton" type="submit">Log In</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <a href="/register.html">Create account</a>
+      </p>
+
+      <p class="footer-note">WiTime Billing · Secure account access</p>
+    </section>
+  </main>
+
+  <script src="/js/login.js"></script>
+</body>
+</html>

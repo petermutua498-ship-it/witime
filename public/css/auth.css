@@ -1,0 +1,231 @@
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --blue: #0759c7;
+  --deep-blue: #063b91;
+  --text: #17243b;
+  --muted: #718096;
+  --border: #dce5f0;
+  --white: #ffffff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #0645a5, #0878e8);
+}
+
+.auth-shell {
+  min-height: 100vh;
+  padding: 32px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Logo watermark behind the blue background */
+.auth-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("/images/witime-logo.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(65vw, 620px);
+  opacity: 0.10;
+  pointer-events: none;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 22px;
+  box-shadow: 0 24px 70px rgba(0, 22, 65, 0.28);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 34px;
+  color: var(--deep-blue);
+  text-decoration: none;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.brand img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.auth-heading {
+  margin-bottom: 26px;
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.auth-heading h1 {
+  margin: 8px 0;
+  font-size: clamp(25px, 5vw, 31px);
+  letter-spacing: -0.8px;
+}
+
+.auth-heading > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+label {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 47px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--white);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(7, 89, 199, 0.12);
+}
+
+button {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--blue);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: var(--deep-blue);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.hint {
+  margin: -4px 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.message {
+  display: none;
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.message.error {
+  display: block;
+  color: #a61b1b;
+  background: #fff0f0;
+}
+
+.message.success {
+  display: block;
+  color: #17663a;
+  background: #eaf8ef;
+}
+
+.auth-switch {
+  margin: 24px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.auth-switch a {
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.footer-note {
+  margin: 26px 0 0;
+  color: #9aa7b7;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .auth-shell {
+    padding: 20px 12px;
+  }
+
+  .auth-card {
+    padding: 25px 21px;
+    border-radius: 17px;
+  }
+
+  .brand {
+    margin-bottom: 26px;
+  }
+
+  .auth-shell::before {
+    background-size: 90vw;
+  }
+}

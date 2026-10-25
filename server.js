@@ -40,6 +40,31 @@ async function connectDatabase() {
 }
 
 // --------------------------------------------------
+// ADMIN AUTHENTICATION ROUTES
+// --------------------------------------------------
+
+app.post("/api/admin/login", (req, res) => {
+    const { username, password } = req.body;
+
+    // Make sure ADMIN_USERNAME and ADMIN_PASSWORD are in your .env file
+    if (
+        username === process.env.ADMIN_USERNAME &&
+        password === process.env.ADMIN_PASSWORD
+    ) {
+        return res.json({
+            success: true,
+            message: "Login successful",
+            token: "witime_secure_admin_session_token"
+        });
+    }
+
+    return res.status(401).json({
+        success: false,
+        message: "Invalid username or password."
+    });
+});
+
+// --------------------------------------------------
 // MIKROTIK POLLING ENDPOINT
 // --------------------------------------------------
 

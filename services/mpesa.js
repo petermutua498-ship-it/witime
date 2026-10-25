@@ -13,49 +13,35 @@ const http = axios.create({
     }
 });
 
-
-async function getAccessToken() {
-    const key = process.env.MPESA_CONSUMER_KEY?.trim();
-    const secret = process.env.MPESA_CONSUMER_SECRET?.trim();
-
-    if (!key || !secret) {
-        throw new Error(
-            `Missing Daraja credentials. ` +
-            `Consumer key present: ${Boolean(key)}; ` +
-            `Consumer secret present: ${Boolean(secret)}`
-        );
-    }
-
-    const auth = Buffer.from(`${key}:${secret}`).toString("base64");
-
+exports.getAccessToken = async () => {
     try {
+        // 1. Grab keys and trim any accidental spaces or hidden line breaks
+        const consumerKey = process.env.MPESA_CONSUMER_KEY ? process.env.MPESA_CONSUMER_KEY.trim() : "";
+        const consumerSecret = process.env.MPESA_CONSUMER_SECRET ? process.env.MPESA_CONSUMER_SECRET.trim() : "";
+
+        if (!consumerKey || !consumerSecret) {
+            throw new Error("Consumer Key or Secret is missing from environment variables.");
+        }
+
+        // 2. Encode to Base64 using Buffer
+        const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+
+        // 3. Make the request to Safaricom Sandbox
         const response = await axios.get(
             "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
             {
                 headers: {
-                    Authorization: `Basic ${auth}`,
-                    Accept: "application/json"
-                },
-                timeout: 15000
+                    Authorization: `Basic ${auth}`
+                }
             }
         );
 
         return response.data.access_token;
     } catch (error) {
-        console.error("[WiTime OAuth Error]", {
-            status: error.response?.status,
-            data: error.response?.data ?? error.message,
-            consumerKeyPresent: Boolean(key),
-            consumerSecretPresent: Boolean(secret)
-        });
-
-        throw new Error(
-            `M-Pesa OAuth failed with HTTP ${
-                error.response?.status ?? "network error"
-            }.`
-        );
+        console.error("[WiTime OAuth Detailed Error]:", error.response?.data || error.message);
+        throw new Error("M-Pesa OAuth failed with HTTP 400.");
     }
-}
+};
 
 
 function getTimestamp() {
@@ -142,6 +128,7 @@ async function querySTK(checkoutRequestID) {
 }
 
 module.exports = {
-    getAccessToken,
+    getAccessToken: exports.getAccessToken,
+    
     querySTK
 };

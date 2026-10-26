@@ -45,7 +45,7 @@ form.addEventListener("submit", async (event) => {
       );
     }
 
-    window.location.replace(DASHBOARD_URL);
+    window.location.href = "/dashboard.html";
   } catch (error) {
     showMessage(error.message || "Unable to log in.");
   } finally {

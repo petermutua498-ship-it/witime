@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 
 const packageSchema = new mongoose.Schema(
   {
-    // The account that owns this package
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Account",
@@ -41,20 +40,7 @@ const packageSchema = new mongoose.Schema(
       default: "Active",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
-
-
-packageSchema.index(
-  { ownerId: 1, name: 1 },
-  {
-    unique: true,
-    collation: { locale: "en", strength: 2 },
-    name: "unique_package_name_per_owner",
-  }
-);
-
 
 module.exports = mongoose.model("Package", packageSchema);

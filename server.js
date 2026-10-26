@@ -12,6 +12,7 @@ const Job = require("./models/Job");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cookieParser = require("cookie-parser");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -75,26 +76,52 @@ async function connectDatabase() {
 // ADMIN AUTHENTICATION ROUTES
 // --------------------------------------------------
 
+
 app.post("/api/admin/login", (req, res) => {
     const { username, password } = req.body;
 
-    // Make sure ADMIN_USERNAME and ADMIN_PASSWORD are in your .env file
     if (
-        username === process.env.ADMIN_USERNAME &&
-        password === process.env.ADMIN_PASSWORD
+        !process.env.ADMIN_USERNAME ||
+        !process.env.ADMIN_PASSWORD
     ) {
-        return res.json({
-            success: true,
-            message: "Login successful",
-            token: "witime_secure_admin_session_token"
+        return res.status(500).json({
+            success: false,
+            message: "Admin credentials are not configured."
         });
     }
 
-    return res.status(401).json({
-        success: false,
-        message: "Invalid username or password."
+    if (
+        username !== process.env.ADMIN_USERNAME ||
+        password !== process.env.ADMIN_PASSWORD
+    ) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid username or password."
+        });
+    }
+
+    req.session.admin = {
+        loggedIn: true,
+        username: process.env.ADMIN_USERNAME
+    };
+
+    req.session.save((err) => {
+        if (err) {
+            console.error("Admin session save failed:", err.message);
+
+            return res.status(500).json({
+                success: false,
+                message: "Unable to establish admin session."
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Login successful."
+        });
     });
 });
+
 
 // --------------------------------------------------
 // MIKROTIK POLLING ENDPOINT
@@ -117,7 +144,7 @@ app.get("/api/mikrotik/jobs", async (req, res) => {
         const jobIds = pendingJobs.map(j => j._id);
         await Job.updateMany({ _id: { $in: jobIds } }, { status: "sent" });
 
-        console.log("🚀 Dispatching queued commands to MikroTik from MongoDB:\n" + commandsToRun);
+        console.log(" Dispatching queued commands to MikroTik from MongoDB:\n" + commandsToRun);
 
         res.type("text/plain").send(commandsToRun);
     } catch (error) {

@@ -1,5 +1,5 @@
 
-const DASHBOARD_URL = "/admin/dashboard.html";
+const DASHBOARD_URL = "/dashboard.html";
 
 const form = document.getElementById("registerForm");
 const button = document.getElementById("registerButton");

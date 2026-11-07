@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>User Workspace</p>
+        </div>
+        <ul>
+            <li onclick="location.href='dashboard.html'">Dashboard</li>
+            <li onclick="location.href='packages.html'">Packages</li>
+            <li onclick="location.href='customers.html'">Customers</li>
+            <li class="active">Payments</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li onclick="location.href='reports.html'">Reports</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>Payment Transactions</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Monitor live M-Pesa receipts, payment status, and revenue breakdown</p>
+            </div>
+            <div class="admin">
+                <span id="accountName">User</span>
+                <img src="/images/admin.png" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Search & Filter Controls -->
+            <div class="table-card" style="margin-bottom: 25px; padding: 18px 25px;">
+                <div style="display: flex; gap: 15px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                    <input type="text" id="searchInput" placeholder="Search by M-Pesa Code or Phone..." style="flex: 1; min-width: 250px; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;">
+                    <select id="statusFilter" style="padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Paid">Paid / Completed</option>
+                        <option value="Failed">Failed / Cancelled</option>
+                    </select>
+                    <button id="refreshBtn" style="background: #2563eb; color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">🔄 Refresh Logs</button>
+                </div>
+            </div>
+
+            <!-- Payments Table Card -->
+            <div class="table-card">
+                <h2>Transaction Logs</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>M-Pesa Code</th>
+                            <th>Phone Number</th>
+                            <th>Package Purchased</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Loading payment logs...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked to public/user/js/payments.js -->
+<script src="/user/js/payments.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WiTime | Account Settings</title>
+    <link rel="stylesheet" href="/css/user-dashboard.css" />
+</head>
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <span class="brand-icon">W</span>
+            <span>WiTime</span>
+        </div>
+        <div class="menu-label">WORKSPACE</div>
+        <a href="/dashboard.html" class="nav-link">▦ Dashboard</a>
+        <a href="/packages.html" class="nav-link">◫ Packages</a>
+        <a href="/routers.html" class="nav-link">⌁ MikroTik Routers</a>
+        <a href="/customers.html" class="nav-link">♙ Customers</a>
+        <a href="/payments.html" class="nav-link">↔ Payments</a>
+        <div class="sidebar-bottom">
+            <a href="/account.html" class="nav-link active">⚙ Account Settings</a>
+            <button id="logoutBtn" class="logout-btn">↪ Log out</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div>
+                <div class="topbar-title">Account Settings</div>
+                <div class="muted">Admin profile configuration</div>
+            </div>
+            <div class="profile">
+                <div class="avatar" id="avatar">W</div>
+                <div>
+                    <strong id="userName">Loading...</strong>
+                    <div class="muted" id="userEmail">Checking account...</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div class="section-heading">
+                <h2>Admin Profile</h2>
+                <span class="muted">Session details</span>
+            </div>
+
+            <div style="background: #fff; border: 1px solid var(--border); border-radius: 13px; padding: 25px; max-width: 600px;">
+                <p style="margin-bottom: 15px;"><strong>Logged in as:</strong> Administrator</p>
+                <p style="margin-bottom: 25px; color: var(--muted);">System status: <span style="color: #137333; font-weight: bold;">Active & Connected</span></p>
+                <button onclick="alert('Session is secure.')" style="background: var(--blue); color: #fff; border: 0; padding: 11px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">Verify Session</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

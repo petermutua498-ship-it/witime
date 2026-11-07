@@ -1,16 +1,14 @@
-// ======================================
-// WiTime Admin Dashboard
-// ======================================
 
+/* ======================================
+   WiTime ADMIN Dashboard
+====================================== */
 
 // ======================================
 // CHECK ADMIN SESSION
 // ======================================
 
 async function checkAdminSession() {
-
     try {
-
         const response = await fetch("/api/admin/me", {
             method: "GET",
             credentials: "include",
@@ -18,234 +16,141 @@ async function checkAdminSession() {
         });
 
         if (!response.ok) {
-
-            console.log("Admin session not found.");
-
             window.location.replace("/admin/login.html");
-
             return false;
         }
 
         const data = await response.json();
 
-        console.log("Admin session:", data);
-
-        if (!data.success || !data.admin) {
-
+        // Backend returns admin, NOT account
+        if (!data.success || !data.admin?.loggedIn) {
             window.location.replace("/admin/login.html");
-
             return false;
+        }
+
+        const accountName = document.getElementById("accountName");
+
+        if (accountName) {
+            accountName.textContent = data.admin.username;
         }
 
         return true;
 
     } catch (error) {
-
-        console.error(
-            "Session check failed:",
-            error
-        );
-
+        console.error("Admin session check failed:", error);
         window.location.replace("/admin/login.html");
-
         return false;
     }
 }
-
 
 // ======================================
 // DASHBOARD ELEMENTS
 // ======================================
 
-const onlineUsers =
-    document.getElementById("onlineUsers");
-
-const totalPackages =
-    document.getElementById("totalPackages");
-
-const paymentsToday =
-    document.getElementById("paymentsToday");
-
-const revenueToday =
-    document.getElementById("revenueToday");
-
+const onlineUsers = document.getElementById("onlineUsers");
+const totalPackages = document.getElementById("totalPackages");
+const paymentsToday = document.getElementById("paymentsToday");
+const revenueToday = document.getElementById("revenueToday");
 
 // ======================================
-// LOAD DASHBOARD
+// LOAD DASHBOARD STATISTICS
 // ======================================
 
 async function loadDashboard() {
-
     try {
-
-        const response =
-            await fetch(
-                "/api/dashboard/stats",
-                {
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
+        const response = await fetch("/api/dashboard/stats", {
+            credentials: "include",
+            cache: "no-store"
+        });
 
         if (response.status === 401) {
-
-            window.location.replace(
-                "/admin/login.html"
-            );
-
+            window.location.replace("/admin/login.html");
             return;
         }
 
-        const data =
-            await response.json();
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load dashboard statistics. Status: " +
+                response.status
+            );
+        }
 
-        onlineUsers.textContent =
-            data.onlineUsers ?? 0;
+        const data = await response.json();
 
-        totalPackages.textContent =
-            data.totalPackages ?? 0;
+        if (onlineUsers) {
+            onlineUsers.textContent = data.onlineUsers ?? 0;
+        }
 
-        paymentsToday.textContent =
-            data.paymentsToday ?? 0;
+        if (totalPackages) {
+            totalPackages.textContent = data.totalPackages ?? 0;
+        }
 
-        revenueToday.textContent =
-            "KES " +
-            (data.revenueToday ?? 0);
+        if (paymentsToday) {
+            paymentsToday.textContent = data.paymentsToday ?? 0;
+        }
+
+        if (revenueToday) {
+            revenueToday.textContent =
+                "KES " +
+                Number(data.revenueToday ?? 0).toLocaleString();
+        }
 
     } catch (error) {
-
-        console.error(
-            "Dashboard loading error:",
-            error
-        );
-
+        console.error("Dashboard statistics error:", error);
     }
 }
 
-
 // ======================================
-// LOGOUT
-// ======================================
-
-document.addEventListener(
-    "click",
-    async function(event) {
-
-        const logoutBtn =
-            event.target.closest("#logoutBtn");
-
-        if (!logoutBtn) return;
-
-        if (
-            !confirm(
-                "Are you sure you want to logout?"
-            )
-        ) {
-
-            return;
-        }
-
-        try {
-
-            const response =
-                await fetch(
-                    "/api/admin/logout",
-                    {
-                        method: "POST",
-                        credentials: "include"
-                    }
-                );
-
-            const result =
-                await response.json();
-
-            if (
-                !response.ok ||
-                !result.success
-            ) {
-
-                alert(
-                    result.message ||
-                    "Logout failed."
-                );
-
-                return;
-            }
-
-            // Prevent browser from showing
-            // cached dashboard after logout.
-
-            window.location.replace(
-                "/admin/login.html"
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Logout error:",
-                error
-            );
-
-            alert(
-                "Unable to logout. Please try again."
-            );
-
-        }
-
-    }
-);
-
-
-// ======================================
-// START
+// ADMIN LOGOUT
 // ======================================
 
-async function startDashboard() {
+document.addEventListener("click", async function (event) {
+    const logoutBtn = event.target.closest("#logoutBtn");
 
-    console.log(
-        "Checking administrator session..."
-    );
+    if (!logoutBtn) return;
 
-    const authenticated =
-        await checkAdminSession();
-
-    if (!authenticated) {
-
+    if (!confirm("Are you sure you want to logout?")) {
         return;
     }
 
-    console.log(
-        "Administrator authenticated."
-    );
+    try {
+        logoutBtn.disabled = true;
 
-    await loadDashboard();
+        const response = await fetch("/api/admin/logout", {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store"
+        });
 
-    setInterval(
-        loadDashboard,
-        10000
-    );
+        const result = await response.json();
 
-}
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Logout failed.");
+        }
 
-async function startDashboard() {
+        window.location.replace("/admin/login.html");
 
-    console.log("Checking administrator session...");
+    } catch (error) {
+        console.error("Admin logout error:", error);
+        alert(error.message || "Unable to logout.");
 
-    const authenticated = await checkAdminSession();
-
-    if (!authenticated) {
-        return;
+        logoutBtn.disabled = false;
     }
-
-    console.log("Administrator authenticated.");
-
-    await loadDashboard();
-
-    setInterval(loadDashboard, 10000);
-}
+});
 
 // ======================================
 // START DASHBOARD
 // ======================================
+
+async function startDashboard() {
+    const authenticated = await checkAdminSession();
+
+    if (!authenticated) return;
+
+    await loadDashboard();
+
+    // Refresh every 10 seconds
+    setInterval(loadDashboard, 10000);
+}
 
 startDashboard();

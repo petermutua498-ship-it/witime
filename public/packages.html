@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>User Workspace</p>
+        </div>
+        <ul>
+            <li onclick="location.href='dashboard.html'">Dashboard</li>
+            <li class="active">Packages</li>
+            <li onclick="location.href='customers.html'">Customers</li>
+            <li onclick="location.href='payments.html'">Payments</li>
+            <li onclick="location.href='reports.html'">Reports</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>WiFi Packages</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Configure pricing tiers and durations for your hotspot</p>
+            </div>
+            <div class="admin">
+                <span id="accountName">User</span>
+                <img src="/images/admin.png" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <div id="alertBox" style="display:none; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;"></div>
+
+            <!-- Create Package Form Card -->
+            <div class="table-card" style="margin-bottom: 30px; max-width: 600px;">
+                <h2 style="margin-bottom: 20px;">Create New Package</h2>
+                <form id="packageForm">
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Package Name</label>
+                        <input type="text" id="packageName" placeholder="e.g. 1 Hour Pass" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Price (KES)</label>
+                        <input type="number" id="packagePrice" placeholder="e.g. 10" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Duration / Limit</label>
+                        <input type="text" id="packageDuration" placeholder="e.g. 1 Hour or 500MB" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" id="submitBtn" style="background: #2563eb; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">Add Package</button>
+                </form>
+            </div>
+
+            <!-- Existing Packages Table -->
+            <div class="table-card">
+                <h2>Active Packages</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Duration / Limit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="packageTableBody">
+                        <tr>
+                            <td colspan="4" style="text-align:center;">Loading packages...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked to public/user/js/packages.js -->
+<script src="/user/js/packages.js"></script>
+</body>
+</html>

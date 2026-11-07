@@ -1,34 +1,44 @@
+
 const mongoose = require("mongoose");
 
 const mikrotikSettingsSchema = new mongoose.Schema(
-    {
-        host: {
-            type: String,
-            required: true
-        },
-
-        username: {
-            type: String,
-            required: true
-        },
-
-        password: {
-            type: String,
-            required: true,
-            select: false
-        },
-
-        port: {
-            type: Number,
-            default: 8728
-        }
+  {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      required: true,
+      index: true,
     },
-    {
-        timestamps: true
-    }
+
+    host: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+
+    port: {
+      type: Number,
+      default: 8728,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model(
-    "MikrotikSettings",
-    mikrotikSettingsSchema
+  "MikrotikSettings",
+  mikrotikSettingsSchema
 );

@@ -13,8 +13,9 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
-
+const userRoutes = require("./routes/userRoutes");
 const app = express();
+const adminRoutes = require("./routes/adminRoutes");
 
 // Middleware
 app.use(cors());
@@ -72,55 +73,6 @@ async function connectDatabase() {
     console.log("MongoDB Connected Successfully");
 }
 
-// --------------------------------------------------
-// ADMIN AUTHENTICATION ROUTES
-// --------------------------------------------------
-
-
-app.post("/api/admin/login", (req, res) => {
-    const { username, password } = req.body;
-
-    if (
-        !process.env.ADMIN_USERNAME ||
-        !process.env.ADMIN_PASSWORD
-    ) {
-        return res.status(500).json({
-            success: false,
-            message: "Admin credentials are not configured."
-        });
-    }
-
-    if (
-        username !== process.env.ADMIN_USERNAME ||
-        password !== process.env.ADMIN_PASSWORD
-    ) {
-        return res.status(401).json({
-            success: false,
-            message: "Invalid username or password."
-        });
-    }
-
-    req.session.admin = {
-        loggedIn: true,
-        username: process.env.ADMIN_USERNAME
-    };
-
-    req.session.save((err) => {
-        if (err) {
-            console.error("Admin session save failed:", err.message);
-
-            return res.status(500).json({
-                success: false,
-                message: "Unable to establish admin session."
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: "Login successful."
-        });
-    });
-});
 
 
 // --------------------------------------------------
@@ -208,6 +160,8 @@ app.get("/api/check-payment/:phone", async (req, res) => {
 
 });
 
+
+
 // --------------------------------------------------
 // HEALTH CHECK
 // --------------------------------------------------
@@ -230,6 +184,37 @@ app.use("/api/packages", packageRoutes);
 app.use("/api", paymentRoutes);
 
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
+
+
+// --------------------------------------------------
+// PROTECT ADMIN HTML PAGES
+// --------------------------------------------------
+
+app.use("/admin", (req, res, next) => {
+
+    // Allow the login page to load without authentication
+    if (req.path === "/login.html") {
+        return next();
+    }
+
+    // Only protect HTML pages, not CSS, JS, images or other assets
+    const isHtmlPage =
+        req.path === "/" ||
+        req.path.toLowerCase().endsWith(".html");
+
+    if (!isHtmlPage) {
+        return next();
+    }
+
+    // Check administrator session
+    if (!req.session?.admin?.loggedIn) {
+        return res.redirect("/admin/login.html");
+    }
+
+    next();
+});
 
 
 // --------------------------------------------------

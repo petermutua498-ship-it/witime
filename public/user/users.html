@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - WiTime</title>
+
+    <link rel="stylesheet" href="/user/user.css">
+    <link rel="stylesheet" href="/user/users.css">
+</head>
+<body>
+<div class="container">
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/user/dashboard.html">🏠 Dashboard</a></li>
+            <li><a href="/user/packages.html">📦 Packages</a></li>
+            <li class="active"><a href="/user/users.html">👥 Users</a></li>
+            <li><a href="/user/payments.html">💳 Payments</a></li>
+            <li><a href="/user/reports.html">📈 Reports</a></li>
+            <li><a href="/user/settings.html">⚙ Settings</a></li>
+            <li>
+                <button id="logoutBtn" class="logout-link">🚪 Logout</button>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div>
+                <h1>Hotspot Users</h1>
+                <p class="subtitle">Manage your WiTime customers and connections.</p>
+            </div>
+
+            <div class="admin">
+                <span id="accountName">Loading account...</span>
+                <div class="avatar" aria-hidden="true">👤</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div id="notice" class="notice" hidden></div>
+
+            <div class="user-stats">
+                <article class="card">
+                    <h3>Total Users</h3>
+                    <h2 id="totalUsers">—</h2>
+                    <p>Customers registered</p>
+                </article>
+
+                <article class="card">
+                    <h3>Active Users</h3>
+                    <h2 id="activeUsers">—</h2>
+                    <p>Accounts marked active</p>
+                </article>
+
+                <article class="card">
+                    <h3>Expired Users</h3>
+                    <h2 id="expiredUsers">—</h2>
+                    <p>Access period ended</p>
+                </article>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading users-heading">
+                    <div>
+                        <h2>Customer List</h2>
+                        <p>Search and review your hotspot customers.</p>
+                    </div>
+
+                    <button type="button" id="refreshUsers" class="primary-btn">
+                        ↻ Refresh
+                    </button>
+                </div>
+
+                <div class="user-toolbar">
+                    <input
+                        type="search"
+                        id="userSearch"
+                        placeholder="Search phone or package..."
+                        aria-label="Search hotspot users"
+                    >
+
+                    <select id="statusFilter" aria-label="Filter users by status">
+                        <option value="all">All users</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phone / Username</th>
+                                <th>Package</th>
+                                <th>Status</th>
+                                <th>Expiry</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="usersTable">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    Loading users...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="users-footnote">
+                    User changes must be confirmed by the server and, where
+                    applicable, synchronized with your MikroTik router.
+                </p>
+            </section>
+        </section>
+    </main>
+</div>
+
+<script src="/user/js/users.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>User Workspace</p>
+        </div>
+        <ul>
+            <li onclick="location.href='dashboard.html'">Dashboard</li>
+            <li onclick="location.href='packages.html'">Packages</li>
+            <li onclick="location.href='customers.html'">Customers</li>
+            <li onclick="location.href='payments.html'">Payments</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li class="active">Reports</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>Revenue & Analytics Reports</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Analyze performance metrics, revenue growth, and package popularity</p>
+            </div>
+            <div class="admin">
+                <span id="accountName">User</span>
+                <img src="/images/admin.png" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Summary Metric Cards -->
+            <div class="cards" style="margin-bottom: 30px;">
+                <div class="card">
+                    <h3>Total Revenue (All Time)</h3>
+                    <h2 id="totalRevenue">KES 0</h2>
+                </div>
+                <div class="card">
+                    <h3>Total Transactions</h3>
+                    <h2 id="totalTransactions">0</h2>
+                </div>
+                <div class="card">
+                    <h3>Total Customers</h3>
+                    <h2 id="totalCustomers">0</h2>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown Card -->
+            <div class="table-card">
+                <h2>Revenue Breakdown by Package</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Package Name</th>
+                            <th>Total Sales Count</th>
+                            <th>Revenue Generated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr>
+                            <td colspan="3" style="text-align:center;">Loading analytics reports...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked to public/user/js/reports.js -->
+<script src="/user/js/reports.js"></script>
+</body>
+</html>

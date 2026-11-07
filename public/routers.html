@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routers - WiTime</title>
+    <link rel="stylesheet" href="/user/user.css">
+</head>
+<body>
+<div class="container">
+
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/user/dashboard.html">🏠 Dashboard</a></li>
+            <li><a href="/user/packages.html">📦 Packages</a></li>
+            <li><a href="/user/users.html">👥 Users</a></li>
+            <li><a href="/user/payments.html">💳 Payments</a></li>
+            <li><a href="/user/reports.html">📈 Reports</a></li>
+            <li class="active"><a href="/user/routers.html">📡 Routers</a></li>
+            <li><a href="/user/settings.html">⚙ Settings</a></li>
+            <li>
+                <button type="button" id="logoutBtn" class="logout-link">
+                    🚪 Logout
+                </button>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div>
+                <h1>Router Management</h1>
+                <p class="subtitle">
+                    Connect and manage your MikroTik routers.
+                </p>
+            </div>
+
+            <div class="admin">
+                <span id="accountName">Loading account...</span>
+                <div class="avatar" aria-hidden="true">👤</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div id="alertBox" class="notice" hidden role="status"></div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Register Router</h2>
+                        <p>Enter your MikroTik API connection details.</p>
+                    </div>
+                </div>
+
+                <form id="routerForm">
+                    <div class="router-form-grid">
+                        <div class="form-field">
+                            <label for="routerName">Device Name</label>
+                            <input
+                                type="text"
+                                id="routerName"
+                                placeholder="Main Shop Router"
+                                maxlength="100"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-field">
+                            <label for="routerIp">IP Address / Domain</label>
+                            <input
+                                type="text"
+                                id="routerIp"
+                                placeholder="192.168.88.1"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-field">
+                            <label for="routerPort">API Port</label>
+                            <input
+                                type="number"
+                                id="routerPort"
+                                value="8728"
+                                min="1"
+                                max="65535"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-field">
+                            <label for="routerUser">API Username</label>
+                            <input
+                                type="text"
+                                id="routerUser"
+                                placeholder="Router API username"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-field full-width">
+                            <label for="routerPass">API Password</label>
+                            <input
+                                type="password"
+                                id="routerPass"
+                                placeholder="Router API password"
+                                autocomplete="new-password"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn">
+                        Connect &amp; Save Router
+                    </button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>My Connected Routers</h2>
+                        <p>View router status and manage connections.</p>
+                    </div>
+
+                    <button type="button" id="refreshRoutersBtn">
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Device Name</th>
+                                <th>IP &amp; Port</th>
+                                <th>Active Users</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="routerTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    Loading routers...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<script src="/user/js/routers.js" defer></script>
+</body>
+</html>

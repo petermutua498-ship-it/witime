@@ -8,6 +8,8 @@ const MikrotikSettings =
 const RouterOSClient =
     require("routeros-client").RouterOSClient;
 
+const PaymentSettings = require("../models/PaymentSettings");
+
 // ======================================
 // ADMIN CREDENTIALS
 // ======================================
@@ -120,6 +122,22 @@ router.post("/login", async (req, res) => {
 });
 
 // ======================================
+// PROTECT ADMIN ROUTES
+// ======================================
+
+router.use((req, res, next) => {
+
+    if (!req.session?.admin?.loggedIn) {
+        return res.status(401).json({
+            success: false,
+            message: "Administrator login required."
+        });
+    }
+
+    next();
+});
+
+// ======================================
 // CURRENT ADMIN
 // GET /api/admin/me
 // ======================================
@@ -203,7 +221,7 @@ router.post("/logout", (req, res) => {
 
         }
 
-        res.clearCookie("connect.sid", {
+        res.clearCookie("witime.sid", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax"
@@ -973,5 +991,187 @@ router.post("/mikrotik/disconnect", async (req, res) => {
     }
 
 });
+
+
+// ======================================
+// M-PESA PAYMENT CONFIGURATION
+// ======================================
+
+// GET /api/admin/payment-settings
+router.get("/payment-settings", async (req, res) => {
+    try {
+        const settings = await PaymentSettings.findOne({
+            scope: "primary"
+        });
+
+        if (!settings) {
+            return res.json({
+                success: true,
+                configured: false
+            });
+        }
+
+        return res.json({
+            success: true,
+            configured: true,
+            payment: {
+                paymentMethod: settings.paymentMethod,
+                environment: settings.environment,
+                businessShortCode: settings.businessShortCode,
+                partyB: settings.partyB,
+                accountReference: settings.accountReference,
+                callbackURL: settings.callbackURL,
+                consumerKeyConfigured: !!settings.consumerKeyEncrypted,
+                consumerSecretConfigured: !!settings.consumerSecretEncrypted,
+                passkeyConfigured: !!settings.passkeyEncrypted
+            }
+        });
+    } catch (error) {
+        console.error("Payment settings load error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load payment settings."
+        });
+    }
+});
+
+
+// PUT /api/admin/payment-settings
+router.put("/payment-settings", async (req, res) => {
+    try {
+        const {
+            paymentMethod,
+            environment,
+            businessShortCode,
+            tillNumber,
+            accountReference,
+            callbackURL,
+            consumerKey,
+            consumerSecret,
+            passkey
+        } = req.body;
+
+        if (!["paybill", "till"].includes(paymentMethod)) {
+            return res.status(400).json({
+                success: false,
+                message: "Choose Paybill or Till."
+            });
+        }
+
+        if (!["sandbox", "production"].includes(environment)) {
+            return res.status(400).json({
+                success: false,
+                message: "Choose Sandbox or Production."
+            });
+        }
+
+        if (!businessShortCode || !callbackURL) {
+            return res.status(400).json({
+                success: false,
+                message: "Business shortcode and callback URL are required."
+            });
+        }
+
+        // Paybill uses its shortcode as PartyB.
+        // Buy Goods uses the actual Till number as PartyB.
+        const partyB = paymentMethod === "paybill"
+            ? String(businessShortCode).trim()
+            : String(tillNumber || "").trim();
+
+        if (!partyB) {
+            return res.status(400).json({
+                success: false,
+                message: "Till number is required for Buy Goods."
+            });
+        }
+
+        let parsedCallback;
+
+        try {
+            parsedCallback = new URL(callbackURL);
+        } catch {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid callback URL."
+            });
+        }
+
+        if (
+            environment === "production" &&
+            parsedCallback.protocol !== "https:"
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Production callback URL must use HTTPS."
+            });
+        }
+
+        let settings = await PaymentSettings.findOne({
+            scope: "primary"
+        }).select(
+            "+consumerKeyEncrypted +consumerSecretEncrypted +passkeyEncrypted"
+        );
+
+        const encrypt = PaymentSettings.encryptSecret;
+
+        const nextConsumerKey = consumerKey?.trim()
+            ? encrypt(consumerKey.trim())
+            : settings?.consumerKeyEncrypted;
+
+        const nextConsumerSecret = consumerSecret?.trim()
+            ? encrypt(consumerSecret.trim())
+            : settings?.consumerSecretEncrypted;
+
+        const nextPasskey = passkey?.trim()
+            ? encrypt(passkey.trim())
+            : settings?.passkeyEncrypted;
+
+        if (
+            !nextConsumerKey ||
+            !nextConsumerSecret ||
+            !nextPasskey
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter the Consumer Key, Consumer Secret and Passkey."
+            });
+        }
+
+        if (!settings) {
+            settings = new PaymentSettings({
+                scope: "primary"
+            });
+        }
+
+        settings.paymentMethod = paymentMethod;
+        settings.environment = environment;
+        settings.businessShortCode = String(businessShortCode).trim();
+        settings.partyB = partyB;
+        settings.accountReference =
+            String(accountReference || "WiTime").trim();
+        settings.callbackURL = parsedCallback.toString();
+
+        settings.consumerKeyEncrypted = nextConsumerKey;
+        settings.consumerSecretEncrypted = nextConsumerSecret;
+        settings.passkeyEncrypted = nextPasskey;
+
+        await settings.save();
+
+        return res.json({
+            success: true,
+            message: "M-Pesa payment configuration saved successfully."
+        });
+
+    } catch (error) {
+        console.error("Payment settings save error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to save payment configuration."
+        });
+    }
+});
+
 
 module.exports = router;

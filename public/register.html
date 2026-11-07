@@ -1,66 +1,148 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Account | WiTime Billing</title>
-  <link rel="stylesheet" href="/css/auth.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f5f7fb;
+            margin: 0;
+        }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .auth-logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .auth-logo h2 {
+            color: #1f2937;
+            font-size: 24px;
+            margin: 0;
+        }
+        .auth-logo p {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+        .btn-submit {
+            width: 100%;
+            background-color: #2563eb;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+        .auth-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .auth-footer a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .alert-message {
+            display: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    </style>
 </head>
 <body>
-  <main class="auth-shell">
-    <section class="auth-card">
-      <a class="brand" href="/register.html" aria-label="WiTime Billing home">
-        <img src="/images/logo.png" alt="WiTime logo"
-             onerror="this.style.display='none'" />
-        <span>WiTime <small>Billing System</small></span>
-      </a>
 
-      <div class="auth-heading">
-        <p class="eyebrow">GET STARTED</p>
-        <h1>Create your account</h1>
-        <p>Set up your account to manage your Wi-Fi billing business.</p>
-      </div>
+<div class="auth-card">
+    <div class="auth-logo">
+        <img src="/images/logo.png" alt="WiTime Logo">
+        <h2>Create Workspace</h2>
+        <p>Set up your WiTime operator account</p>
+    </div>
 
-      <form id="registerForm">
-        <label for="name">Full name</label>
-        <input id="name" name="name" type="text"
-               placeholder="Your full name" maxlength="100"
-               autocomplete="name" required />
+    <div id="alertBox" class="alert-message"></div>
 
-        <label for="email">Email address</label>
-        <input id="email" name="email" type="email"
-               placeholder="you@example.com" maxlength="254"
-               autocomplete="email" required />
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" placeholder="e.g. Peter Mutua" required>
+        </div>
 
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password"
-               placeholder="At least 10 characters"
-               minlength="10" maxlength="72"
-               autocomplete="new-password" required />
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="name@example.com" required>
+        </div>
 
-       
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" placeholder="e.g. 254712345678" required>
+        </div>
 
-        <label for="confirmPassword">Confirm password</label>
-        <input id="confirmPassword" name="confirmPassword"
-               type="password" placeholder="Enter password again"
-               minlength="10" maxlength="72"
-               autocomplete="new-password" required />
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Choose a secure password" required>
+        </div>
 
-        <p id="message" class="message" role="alert"></p>
+        <button type="submit" class="btn-submit" id="submitBtn">Register Workspace</button>
+    </form>
 
-        <button id="registerButton" type="submit">Create Account</button>
-      </form>
+    <div class="auth-footer">
+        Already have an account? <a href="/login.html">Sign in here</a>
+    </div>
+</div>
 
-      <p class="auth-switch">
-        Already registered?
-        <a href="/login.html">Log in</a>
-      </p>
-
-      <p class="footer-note">WiTime Billing · Secure account access</p>
-    </section>
-  </main>
-
-  <script src="/js/register.js"></script>
+<script src="/user/js/register.js"></script>
 </body>
 </html>

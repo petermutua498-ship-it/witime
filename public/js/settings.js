@@ -540,3 +540,243 @@ window.addEventListener(
 
     }
 );
+
+
+// ======================================
+// M-PESA PAYMENT SETTINGS
+// ======================================
+
+const paymentSettingsForm =
+    document.getElementById("paymentSettingsForm");
+
+const paymentMethodSelect =
+    document.getElementById("paymentMethod");
+
+const tillNumberGroup =
+    document.getElementById("tillNumberGroup");
+
+function updatePaymentMethodFields() {
+    if (!paymentMethodSelect || !tillNumberGroup) return;
+
+    const isTill = paymentMethodSelect.value === "till";
+
+    tillNumberGroup.style.display = isTill ? "" : "none";
+
+    document.getElementById("tillNumber").required = isTill;
+}
+
+if (paymentMethodSelect) {
+    paymentMethodSelect.addEventListener(
+        "change",
+        updatePaymentMethodFields
+    );
+}
+
+async function loadPaymentSettings() {
+    const status = document.getElementById("mpesaStatus");
+    const credentialsStatus = document.getElementById(
+        "paymentCredentialsStatus"
+    );
+
+    try {
+        const response = await fetch(
+            "/api/admin/payment-settings",
+            {
+                credentials: "include",
+                cache: "no-store"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Unable to load settings.");
+        }
+
+        if (!data.configured) {
+            status.textContent = "Not Configured";
+            status.className = "status disconnected";
+            updatePaymentMethodFields();
+            return;
+        }
+
+        const payment = data.payment;
+
+        document.getElementById("paymentMethod").value =
+            payment.paymentMethod;
+
+        document.getElementById("mpesaEnvironment").value =
+            payment.environment;
+
+        document.getElementById("businessShortCode").value =
+            payment.businessShortCode || "";
+
+        document.getElementById("tillNumber").value =
+            payment.paymentMethod === "till"
+                ? payment.partyB || ""
+                : "";
+
+        document.getElementById("accountReference").value =
+            payment.accountReference || "WiTime";
+
+        document.getElementById("callbackURL").value =
+            payment.callbackURL || "";
+
+        status.textContent = "Configured";
+        status.className = "status connected";
+
+        credentialsStatus.textContent =
+            "Consumer Key: " +
+            (payment.consumerKeyConfigured ? "Saved" : "Missing") +
+            " | Consumer Secret: " +
+            (payment.consumerSecretConfigured ? "Saved" : "Missing") +
+            " | Passkey: " +
+            (payment.passkeyConfigured ? "Saved" : "Missing");
+
+        updatePaymentMethodFields();
+
+    } catch (error) {
+        console.error("Payment settings load error:", error);
+
+        status.textContent = "Unable to Load";
+        status.className = "status disconnected";
+    }
+}
+
+
+// SAVE PAYMENT SETTINGS
+
+if (paymentSettingsForm) {
+    paymentSettingsForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const message = document.getElementById(
+            "paymentSettingsMessage"
+        );
+
+        message.textContent = "Saving payment configuration...";
+        message.className = "message";
+
+        const payload = {
+            paymentMethod:
+                document.getElementById("paymentMethod").value,
+
+            environment:
+                document.getElementById("mpesaEnvironment").value,
+
+            businessShortCode:
+                document.getElementById("businessShortCode").value.trim(),
+
+            tillNumber:
+                document.getElementById("tillNumber").value.trim(),
+
+            accountReference:
+                document.getElementById("accountReference").value.trim(),
+
+            callbackURL:
+                document.getElementById("callbackURL").value.trim(),
+
+            consumerKey:
+                document.getElementById("consumerKey").value.trim(),
+
+            consumerSecret:
+                document.getElementById("consumerSecret").value.trim(),
+
+            passkey:
+                document.getElementById("mpesaPasskey").value.trim()
+        };
+
+        try {
+            const response = await fetch(
+                "/api/admin/payment-settings",
+                {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Unable to save configuration."
+                );
+            }
+
+            message.textContent = data.message;
+            message.classList.add("success");
+
+            // Clear secret inputs after saving.
+            document.getElementById("consumerKey").value = "";
+            document.getElementById("consumerSecret").value = "";
+            document.getElementById("mpesaPasskey").value = "";
+
+            await loadPaymentSettings();
+
+        } catch (error) {
+            console.error("Payment settings save error:", error);
+
+            message.textContent = error.message;
+            message.classList.add("error");
+        }
+    });
+}
+
+
+// LOAD PAYMENT SETTINGS WHEN THE PAGE OPENS
+
+window.addEventListener("DOMContentLoaded", () => {
+    updatePaymentMethodFields();
+    loadPaymentSettings();
+});
+
+// ======================================
+// WITime ADMIN LOGOUT
+// ======================================
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function () {
+
+        const confirmLogout = confirm(
+            "Are you sure you want to logout of WiTime?"
+        );
+
+        if (!confirmLogout) return;
+
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = "Logging out...";
+
+        try {
+            const response = await fetch("/api/admin/logout", {
+                method: "POST",
+                credentials: "include",
+                cache: "no-store"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Logout failed."
+                );
+            }
+
+            window.location.replace("/admin/login.html");
+
+        } catch (error) {
+
+            console.error("Logout error:", error);
+
+            alert(error.message || "Unable to logout.");
+
+            logoutBtn.disabled = false;
+            logoutBtn.textContent = "Logout";
+        }
+    });
+}

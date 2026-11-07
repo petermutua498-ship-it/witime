@@ -1,0 +1,178 @@
+
+/* WiTime Packages page */
+.package-form-panel {
+    margin-bottom: 24px;
+}
+
+.package-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.package-form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.package-form-grid input,
+.package-form-grid select {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid #d7deea;
+    border-radius: 8px;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+    font-weight: 400;
+    box-sizing: border-box;
+}
+
+.package-form-grid input:focus,
+.package-form-grid select:focus {
+    outline: 2px solid #bfdbfe;
+    border-color: #2563eb;
+}
+
+.package-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.package-btn {
+    padding: 10px 15px;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.package-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.package-btn.primary {
+    color: #fff;
+    background: #2563eb;
+}
+
+.package-btn.primary:hover {
+    background: #1d4ed8;
+}
+
+.package-btn.secondary {
+    color: #243247;
+    background: #e9eef5;
+}
+
+.package-list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.package-count {
+    white-space: nowrap;
+    color: #475569;
+    font-size: 13px;
+}
+
+.package-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.package-status.active {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.package-status.inactive {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.package-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.package-action {
+    padding: 7px 9px;
+    border: 1px solid #d7deea;
+    border-radius: 6px;
+    background: #fff;
+    color: #1d4ed8;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.package-action:hover {
+    background: #eff6ff;
+}
+
+.package-action.delete {
+    color: #b91c1c;
+}
+
+.package-action.delete:hover {
+    background: #fef2f2;
+}
+
+#notice {
+    margin-bottom: 18px;
+    padding: 12px 15px;
+    border-radius: 8px;
+}
+
+#notice.success {
+    color: #166534;
+    background: #dcfce7;
+}
+
+#notice.error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+#notice.info {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+@media (max-width: 1000px) {
+    .package-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .package-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .package-list-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .package-actions {
+        min-width: 130px;
+    }
+}

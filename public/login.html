@@ -1,51 +1,139 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | WiTime Billing</title>
-  <link rel="stylesheet" href="/css/auth.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f5f7fb;
+            margin: 0;
+        }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .auth-logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .auth-logo h2 {
+            color: #1f2937;
+            font-size: 24px;
+            margin: 0;
+        }
+        .auth-logo p {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+        .btn-submit {
+            width: 100%;
+            background-color: #2563eb;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+        .auth-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .auth-footer a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .alert-message {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+    </style>
 </head>
 <body>
-  <main class="auth-shell">
-    <section class="auth-card">
-      <a class="brand" href="/login.html" aria-label="WiTime Billing home">
-        <img src="/images/logo.png" alt="WiTime logo"
-             onerror="this.style.display='none'" />
-        <span>WiTime <small>Billing System</small></span>
-      </a>
 
-      <div class="auth-heading">
-        <p class="eyebrow">WELCOME BACK</p>
-        <h1>Log in to WiTime</h1>
-        <p>Manage your hotspot, packages and payments.</p>
-      </div>
+<div class="auth-card">
+    <div class="auth-logo">
+        <img src="/images/logo.png" alt="WiTime Logo">
+        <h2>WiTime Workspace</h2>
+        <p>Sign in to manage your hotspot</p>
+    </div>
 
-      <form id="loginForm">
-        <label for="email">Email address</label>
-        <input id="email" name="email" type="email"
-               placeholder="you@example.com" autocomplete="email" required />
+    <div id="alertBox" class="alert-message"></div>
 
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password"
-               placeholder="Enter your password"
-               autocomplete="current-password" required />
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="user@witime.com" required>
+        </div>
 
-        <p id="message" class="message" role="alert"></p>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
 
-        <button id="loginButton" type="submit">Log In</button>
-      </form>
+        <button type="submit" class="btn-submit" id="submitBtn">Sign In</button>
+    </form>
 
-      <p class="auth-switch">
-        Don't have an account?
-        <a href="/register.html">Create account</a>
-      </p>
+    <div class="auth-footer">
+        Don't have an account? <a href="/register.html">Register workspace</a>
+    </div>
+</div>
 
-      <p class="footer-note">WiTime Billing · Secure account access</p>
-    </section>
-  </main>
-
-  <script src="/js/login.js"></script>
+<script src="/user/js/login.js"></script>
 </body>
 </html>

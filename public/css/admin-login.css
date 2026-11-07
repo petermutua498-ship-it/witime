@@ -1,3 +1,8 @@
+
+/* =====================================
+   WiTime Administrator Login
+===================================== */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -7,209 +12,200 @@
 body {
     font-family: Arial, sans-serif;
     min-height: 100vh;
-
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
 
-    background: #f4f6f8;
+    background: #f1f5f9;
 }
+
+/* =====================================
+   LOGIN CONTAINER
+===================================== */
 
 .login-container {
     width: 100%;
-    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .login-card {
     width: 100%;
-    max-width: 400px;
-
-    margin: auto;
-    padding: 35px;
+    max-width: 430px;
+    padding: 38px 35px;
 
     background: #ffffff;
+    border-radius: 16px;
 
-    border-radius: 12px;
-
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.09);
 
     text-align: center;
 }
 
-/* =========================
+/* =====================================
    LOGO
-========================= */
+===================================== */
 
 .logo {
-    width: 75px;
-    height: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 25px;
+}
 
+.logo img {
+    width: 65px;
+    height: 65px;
+    max-width: 100%;
     object-fit: contain;
+    display: block;
+}
 
+.logo h2 {
+    font-size: 20px;
+    color: #0756b9;
+}
+
+/* =====================================
+   HEADINGS
+===================================== */
+
+.login-card h1 {
+    font-size: 27px;
+    color: #172554;
     margin-bottom: 10px;
 }
 
-.login-card h1 {
-    font-size: 28px;
-    margin-bottom: 8px;
+.login-card > p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 25px;
 }
 
-.subtitle {
-    color: #777;
-    margin-bottom: 30px;
-}
-
-/* =========================
-   FORMS
-========================= */
+/* =====================================
+   FORM
+===================================== */
 
 .form-group {
     text-align: left;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 
     font-size: 14px;
     font-weight: bold;
+    color: #334155;
 }
 
 .form-group input {
     width: 100%;
+    padding: 13px 14px;
 
-    padding: 12px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
 
     outline: none;
+    background: #f8fafc;
 
     font-size: 15px;
+    color: #1e293b;
 
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus {
-    border-color: #007bff;
+    border-color: #0878ee;
+    background: #ffffff;
 
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(8, 120, 238, 0.12);
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* =====================================
+   LOGIN BUTTON
+===================================== */
 
-#loginButton,
-#signupButton {
+#loginBtn {
     width: 100%;
-
-    padding: 13px;
+    padding: 14px;
 
     border: none;
+    border-radius: 8px;
 
-    border-radius: 7px;
-
-    background: #007bff;
-
-    color: white;
+    background: #0878ee;
+    color: #ffffff;
 
     font-size: 16px;
+    font-weight: bold;
 
     cursor: pointer;
 
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
 }
 
-#loginButton:hover,
-#signupButton:hover {
-    background: #0069d9;
+#loginBtn:hover {
+    background: #0563c7;
 }
 
-#loginButton:disabled,
-#signupButton:disabled {
+#loginBtn:active {
+    transform: scale(0.99);
+}
+
+#loginBtn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
 
-/* =========================
-   MESSAGES
-========================= */
+/* =====================================
+   LOGIN MESSAGE
+===================================== */
 
-#loginMessage,
-#signupMessage {
+#loginMessage {
     min-height: 20px;
-
-    margin-bottom: 15px;
-
-    font-size: 14px;
-}
-
-/* =========================
-   LOGIN / SIGNUP SWITCH
-========================= */
-
-.auth-switch {
-    margin-top: 22px;
+    margin-bottom: 12px;
 
     font-size: 14px;
-
-    color: #777;
+    color: #dc2626;
 }
 
-#switchAuth {
-    background: none;
-
-    border: none;
-
-    padding: 0;
-
-    margin-left: 4px;
-
-    color: #007bff;
-
-    cursor: pointer;
-
-    font-weight: bold;
-
-    font-size: 14px;
-}
-
-#switchAuth:hover {
-    text-decoration: underline;
-}
-
-/* =========================
+/* =====================================
    FOOTER
-========================= */
+===================================== */
 
-.footer {
+.login-footer {
     margin-top: 25px;
+    margin-bottom: 0 !important;
 
     font-size: 12px;
-
-    color: #999;
+    color: #94a3b8;
 }
 
-/* =========================
-   MOBILE
-========================= */
+/* =====================================
+   MOBILE RESPONSIVENESS
+===================================== */
 
 @media (max-width: 480px) {
-
-    .login-container {
+    body {
         padding: 15px;
     }
 
     .login-card {
-        padding: 28px 22px;
+        padding: 30px 22px;
     }
 
     .login-card h1 {
-        font-size: 25px;
+        font-size: 24px;
     }
 
+    .logo img {
+        width: 55px;
+        height: 55px;
+    }
 }

@@ -397,53 +397,140 @@
 
         <!-- PAYMENT -->
 
-        <section class="settings-card">
+        
+<!-- M-PESA PAYMENT CONFIGURATION -->
 
-            <div class="card-header">
+<section class="settings-card">
 
-                <div>
+    <div class="card-header">
+        <div>
+            <h2>💳 M-Pesa Payment Configuration</h2>
+            <p>Configure where WiTime customers send their payments.</p>
+        </div>
 
-                    <h2>💳 Payment System</h2>
+        <span id="mpesaStatus" class="status">
+            Checking...
+        </span>
+    </div>
 
-                    <p>
-                        Monitor your payment integration.
-                    </p>
+    <form id="paymentSettingsForm">
 
-                </div>
+        <div class="form-row">
 
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method</label>
+
+                <select id="paymentMethod" required>
+                    <option value="till">Buy Goods – Till Number</option>
+                    <option value="paybill">Paybill</option>
+                </select>
             </div>
 
+            <div class="form-group">
+                <label for="mpesaEnvironment">Environment</label>
 
-            <div class="status-row">
-
-                <span>M-Pesa Integration</span>
-
-                <span
-                    id="mpesaStatus"
-                    class="status">
-
-                    Checking...
-
-                </span>
-
+                <select id="mpesaEnvironment" required>
+                    <option value="sandbox">Sandbox – Testing</option>
+                    <option value="production">Production – Live</option>
+                </select>
             </div>
 
+        </div>
 
-            <div class="status-row">
+        <div class="form-row">
 
-                <span>Payment Callback</span>
+            <div class="form-group">
+                <label for="businessShortCode">
+                    Business Shortcode
+                </label>
 
-                <span
-                    id="callbackStatus"
-                    class="status">
-
-                    Checking...
-
-                </span>
-
+                <input
+                    type="text"
+                    id="businessShortCode"
+                    placeholder="Enter Daraja Business Shortcode"
+                    required>
             </div>
 
-        </section>
+            <div class="form-group" id="tillNumberGroup">
+                <label for="tillNumber">Buy Goods Till Number</label>
+
+                <input
+                    type="text"
+                    id="tillNumber"
+                    placeholder="Enter your Till Number">
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label for="accountReference">Account Reference</label>
+
+            <input
+                type="text"
+                id="accountReference"
+                value="WiTime"
+                maxlength="12">
+        </div>
+
+        <div class="form-group">
+            <label for="callbackURL">M-Pesa Callback URL</label>
+
+            <input
+                type="url"
+                id="callbackURL"
+                placeholder="https://your-domain.com/api/apicallback"
+                required>
+        </div>
+
+        <h3>Daraja API Credentials</h3>
+
+        <p>
+            Leave existing credentials blank if you do not want to
+            replace them.
+        </p>
+
+        <div class="form-group">
+            <label for="consumerKey">Consumer Key</label>
+
+            <input
+                type="password"
+                id="consumerKey"
+                autocomplete="new-password"
+                placeholder="Enter Consumer Key">
+        </div>
+
+        <div class="form-group">
+            <label for="consumerSecret">Consumer Secret</label>
+
+            <input
+                type="password"
+                id="consumerSecret"
+                autocomplete="new-password"
+                placeholder="Enter Consumer Secret">
+        </div>
+
+        <div class="form-group">
+            <label for="mpesaPasskey">Lipa Na M-Pesa Passkey</label>
+
+            <input
+                type="password"
+                id="mpesaPasskey"
+                autocomplete="new-password"
+                placeholder="Enter Passkey">
+        </div>
+
+        <div id="paymentCredentialsStatus"></div>
+
+        <div id="paymentSettingsMessage" class="message"></div>
+
+        <button type="submit" class="primary-btn">
+            Save Payment Configuration
+        </button>
+
+    </form>
+
+</section>
+
 
     </main>
 

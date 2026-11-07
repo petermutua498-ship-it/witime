@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>User Workspace</p>
+        </div>
+        <ul>
+            <li onclick="location.href='dashboard.html'">Dashboard</li>
+            <li onclick="location.href='packages.html'">Packages</li>
+            <li class="active">Customers</li>
+            <li onclick="location.href='payments.html'">Payments</li>
+            <li onclick="location.href='reports.html'">Reports</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>Customers & Connected Users</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Track client activity, active sessions, and usage history</p>
+            </div>
+            <div class="admin">
+                <span id="accountName">User</span>
+                <img src="/images/admin.png" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Search & Filter Controls -->
+            <div class="table-card" style="margin-bottom: 25px; padding: 18px 25px;">
+                <div style="display: flex; gap: 15px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                    <input type="text" id="searchInput" placeholder="Search by phone number..." style="flex: 1; min-width: 250px; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;">
+                    <button id="refreshBtn" style="background: #2563eb; color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">🔄 Refresh List</button>
+                </div>
+            </div>
+
+            <!-- Customers Table -->
+            <div class="table-card">
+                <h2>Customer Directory</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Active Package</th>
+                            <th>Total Spent</th>
+                            <th>Last Connected</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center;">Loading customer records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked to public/user/js/customers.js -->
+<script src="/user/js/customers.js"></script>
+</body>
+</html>

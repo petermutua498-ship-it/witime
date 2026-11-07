@@ -1,99 +1,107 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>WiTime - Administrator Login</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - WiTime</title>
     <link rel="stylesheet" href="/css/admin-login.css">
-
 </head>
-
 <body>
 
-<div class="login-container">
+    <main class="login-container">
+        <div class="login-card">
 
-    <div class="login-card">
-
-        <img
-            src="/images/logo.png"
-            class="logo"
-            alt="WiTime"
-        >
-
-        <h1>WiTime</h1>
-
-        <p class="subtitle">
-            Administrator Login
-        </p>
-
-
-        <form id="loginForm">
-
-            <div class="form-group">
-
-                <label for="loginUsername">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="loginUsername"
-                    placeholder="Enter username"
-                    autocomplete="username"
-                    required
-                >
-
+            <div class="logo">
+                <img src="/images/logo.png" alt="WiTime Logo">
+                <h2>WiTime</h2>
             </div>
 
+            <h1>Administrator Login</h1>
+            <p>Sign in to manage your WiTime network.</p>
 
-            <div class="form-group">
+            <form id="adminLoginForm">
 
-                <label for="loginPassword">
-                    Password
-                </label>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter admin username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
 
-                <input
-                    type="password"
-                    id="loginPassword"
-                    placeholder="Enter password"
-                    autocomplete="current-password"
-                    required
-                >
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
 
-            </div>
+                <p id="loginMessage" role="alert" aria-live="polite"></p>
 
+                <button type="submit" id="loginBtn">
+                    Login to Dashboard
+                </button>
 
-            <p id="loginMessage"></p>
+            </form>
 
+            <p class="login-footer">
+                WiTime Network Management
+            </p>
 
-            <button
-                type="submit"
-                id="loginButton">
+        </div>
+    </main>
 
-                Login
+    <script>
+    const form = document.getElementById("adminLoginForm");
+    const message = document.getElementById("loginMessage");
+    const button = document.getElementById("loginBtn");
 
-            </button>
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-        </form>
+        message.textContent = "";
+        button.disabled = true;
+        button.textContent = "Signing in...";
 
+        try {
+            const response = await fetch("/api/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    username: document.getElementById("username").value.trim(),
+                    password: document.getElementById("password").value
+                })
+            });
 
-        <p class="footer">
-            WiTime Administration
-        </p>
+            const data = await response.json();
 
-    </div>
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Login failed.");
+            }
 
-</div>
+            window.location.href = "/admin/dashboard.html";
 
-
-<script src="/admin/js/admin-login.js"></script>
+        } catch (error) {
+            message.textContent = error.message;
+        } finally {
+            button.disabled = false;
+            button.textContent = "Login to Dashboard";
+        }
+    });
+    </script>
 
 </body>
-
 </html>

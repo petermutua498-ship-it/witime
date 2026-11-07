@@ -1,131 +1,95 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WiTime | Dashboard</title>
-  <link rel="stylesheet" href="/css/user-dashboard.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <span class="brand-icon">W</span>
-      <span>WiTime</span>
-    </div>
 
-    <div class="menu-label">WORKSPACE</div>
-
-    <a href="/dashboard.html" class="nav-link active">▦ Dashboard</a>
-    <a href="/packages.html" class="nav-link">◫ Packages</a>
-    <a href="/routers.html" class="nav-link">⌁ MikroTik Routers</a>
-    <a href="/customers.html" class="nav-link">♙ Customers</a>
-    <a href="/payments.html" class="nav-link">↔ Payments</a>
-
-    <div class="sidebar-bottom">
-      <a href="/account.html" class="nav-link">⚙ Account Settings</a>
-      <button id="logoutBtn" class="logout-btn">↪ Log out</button>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
-      <div>
-        <div class="topbar-title">Dashboard</div>
-        <div class="muted">Your WiFi billing workspace</div>
-      </div>
-
-      <div class="profile">
-        <div class="avatar" id="avatar">W</div>
-        <div>
-          <strong id="userName">Loading...</strong>
-          <div class="muted" id="userEmail">Checking account...</div>
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>Operator Panel</p>
         </div>
-      </div>
-    </header>
+        <ul>
+            <li class="active">Dashboard</li>
+            <li onclick="location.href='packages.html'">Packages</li>
+            <li onclick="location.href='customers.html'">Customers</li>
+            <li onclick="location.href='payments.html'">Payments</li>
+            <li onclick="location.href='reports.html'">Reports</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
 
-    <section class="content">
-      <div class="welcome">
-        <div>
-          <p class="eyebrow">YOUR WORKSPACE</p>
-          <h1>Welcome, <span id="welcomeName">...</span>!</h1>
-          <p>Manage your hotspot billing and monitor your business from one place.</p>
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>Dashboard Overview</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Welcome back, <span id="accountName" style="font-weight: bold; color: #2563eb;">Operator</span></p>
+            </div>
+            <div class="admin">
+                <span>Hotspot Live</span>
+                <img src="/images/admin.png" alt="Operator">
+            </div>
         </div>
-        <span class="status"><span class="status-dot"></span> Account active</span>
-      </div>
 
-      <div class="section-heading">
-        <h2>Overview</h2>
-        <span class="muted">Your account summary</span>
-      </div>
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Stat Cards Grid -->
+            <div class="cards">
+                <div class="card">
+                    <h3>👥 Online Users</h3>
+                    <h2 id="onlineUsers">0</h2>
+                </div>
+                <div class="card">
+                    <h3>📦 Active Packages</h3>
+                    <h2 id="totalPackages">0</h2>
+                </div>
+                <div class="card">
+                    <h3>💳 Payments Today</h3>
+                    <h2 id="paymentsToday">0</h2>
+                </div>
+                <div class="card">
+                    <h3>💰 Revenue Today</h3>
+                    <h2 id="revenueToday">KES 0</h2>
+                </div>
+            </div>
 
-      <div class="stats-grid">
-        <article class="stat-card">
-          <div class="stat-top"><span>Packages</span><span class="stat-icon">◫</span></div>
-          <div class="stat-number" id="packageCount">—</div>
-          <div class="stat-note">Billing packages created</div>
-        </article>
+            <!-- Recent Payments Table Card -->
+            <div class="table-card">
+                <h2>Recent Customer Payments</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Package Name</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTable">
+                        <tr>
+                            <td colspan="5" style="text-align:center;">Loading recent transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <article class="stat-card">
-          <div class="stat-top"><span>Customers</span><span class="stat-icon">♙</span></div>
-          <div class="stat-number" id="customerCount">—</div>
-          <div class="stat-note">Registered hotspot customers</div>
-        </article>
-
-        <article class="stat-card">
-          <div class="stat-top"><span>Payments</span><span class="stat-icon">↔</span></div>
-          <div class="stat-number" id="paymentCount">—</div>
-          <div class="stat-note">Payment records</div>
-        </article>
-
-        <article class="stat-card">
-          <div class="stat-top"><span>Revenue</span><span class="stat-icon">KSh</span></div>
-          <div class="stat-number" id="revenue">—</div>
-          <div class="stat-note">Successful payments only</div>
-        </article>
-      </div>
-
-      <div class="section-heading">
-        <h2>Quick actions</h2>
-        <span class="muted">Get started</span>
-      </div>
-
-      <div class="actions-grid">
-        <a href="/packages.html" class="action-card">
-          <span class="action-icon">＋</span>
-          <div><strong>Manage packages</strong><p>Create or update your WiFi plans.</p></div>
-          <span class="action-arrow">→</span>
-        </a>
-
-        <a href="/routers.html" class="action-card">
-          <span class="action-icon">⌁</span>
-          <div><strong>Connect a router</strong><p>Configure your MikroTik connection.</p></div>
-          <span class="action-arrow">→</span>
-        </a>
-
-        <a href="/customers.html" class="action-card">
-          <span class="action-icon">♙</span>
-          <div><strong>View customers</strong><p>Review your hotspot customers.</p></div>
-          <span class="action-arrow">→</span>
-        </a>
-
-        <a href="/payments.html" class="action-card">
-          <span class="action-icon">↔</span>
-          <div><strong>View payments</strong><p>Check your payment records.</p></div>
-          <span class="action-arrow">→</span>
-        </a>
-      </div>
-
-      <div class="notice">
-        <strong>Next step</strong>
-        <p>Connect your MikroTik router and configure your WiFi packages to prepare your billing workspace.</p>
-      </div>
-
-      <p class="page-message" id="pageMessage"></p>
-    </section>
-  </main>
-
-  <script src="/js/dashboard.js"></script>
+<!-- Linked Client-Side JavaScript -->
+<script src="/user/js/dashboard.js"></script>
 </body>
 </html>

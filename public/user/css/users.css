@@ -1,0 +1,164 @@
+
+/* WiTime Users page */
+
+.user-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.users-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.user-toolbar {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.user-toolbar input,
+.user-toolbar select {
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #d5deea;
+    border-radius: 8px;
+    background: #fff;
+    color: #243247;
+    font: inherit;
+}
+
+.user-toolbar input {
+    flex: 1;
+    min-width: 180px;
+}
+
+.user-toolbar select {
+    min-width: 150px;
+}
+
+.primary-btn,
+.user-action {
+    border: none;
+    border-radius: 7px;
+    padding: 9px 13px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.primary-btn {
+    background: #1769d2;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background: #1255ad;
+}
+
+.user-action {
+    margin: 2px;
+    background: #eaf2ff;
+    color: #1757a6;
+}
+
+.user-action:hover {
+    background: #d8e7ff;
+}
+
+.user-action.danger {
+    background: #fff0f0;
+    color: #b42318;
+}
+
+.user-action.danger:hover {
+    background: #ffe0e0;
+}
+
+.user-action:disabled,
+.primary-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.user-status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.user-status.active {
+    background: #e5f8ec;
+    color: #187443;
+}
+
+.user-status.expired {
+    background: #fff3d8;
+    color: #8a5a00;
+}
+
+.user-status.disabled {
+    background: #ffe8e8;
+    color: #a52626;
+}
+
+.users-footnote {
+    margin-top: 16px;
+    color: #68778b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#usersTable td {
+    vertical-align: middle;
+}
+
+#usersTable .empty-state {
+    padding: 28px 12px;
+    text-align: center;
+    color: #68778b;
+}
+
+@media (max-width: 900px) {
+    .user-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .user-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .user-toolbar {
+        flex-direction: column;
+    }
+
+    .user-toolbar input,
+    .user-toolbar select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .users-heading {
+        align-items: flex-start;
+    }
+
+    .users-heading .primary-btn {
+        width: 100%;
+    }
+
+    #usersTable {
+        min-width: 650px;
+    }
+}

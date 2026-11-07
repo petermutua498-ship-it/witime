@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - WiTime Workspace</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/images/logo.png" alt="WiTime Logo">
+            <h2>WiTime</h2>
+            <p>User Workspace</p>
+        </div>
+        <ul>
+            <li onclick="location.href='dashboard.html'">Dashboard</li>
+            <li onclick="location.href='packages.html'">Packages</li>
+            <li onclick="location.href='customers.html'">Customers</li>
+            <li onclick="location.href='payments.html'">Payments</li>
+            <li onclick="location.href='routers.html'">Routers</li>
+            <li onclick="location.href='reports.html'">Reports</li>
+            <li class="active">Settings</li>
+            <li id="logoutBtn" style="cursor: pointer;">🚪 Logout</li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="main">
+        <!-- Top Header Bar -->
+        <div class="header">
+            <div>
+                <h1>Workspace Settings</h1>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Manage account profile, business details, and M-Pesa configurations</p>
+            </div>
+            <div class="admin">
+                <span id="accountName">User</span>
+                <img src="/images/admin.png" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <div id="alertBox" style="display:none; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;"></div>
+
+            <!-- Profile & Account Settings -->
+            <div class="table-card" style="margin-bottom: 30px; max-width: 650px;">
+                <h2 style="margin-bottom: 20px;">Operator Profile Settings</h2>
+                <form id="profileForm">
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Full Name</label>
+                        <input type="text" id="settingName" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Email Address</label>
+                        <input type="email" id="settingEmail" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Contact Phone Number</label>
+                        <input type="text" id="settingPhone" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" id="saveProfileBtn" style="background: #2563eb; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">Update Profile</button>
+                </form>
+            </div>
+
+            <!-- Security & Password Change -->
+            <div class="table-card" style="max-width: 650px;">
+                <h2 style="margin-bottom: 20px;">Security & Password</h2>
+                <form id="passwordForm">
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Current Password</label>
+                        <input type="password" id="currentPassword" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">New Password</label>
+                        <input type="password" id="newPassword" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" id="changePasswordBtn" style="background: #374151; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">Change Password</button>
+                </form>
+            </div>
+
+            <!-- M-Pesa Payment Gateway Settings -->
+<div class="table-card" style="margin-bottom: 30px; max-width: 650px;">
+    <h2 style="margin-bottom: 20px;">M-Pesa Payment Setup</h2>
+    <p style="color: #6b7280; font-size: 13px; margin-bottom: 20px;">
+        Enter your Till or Paybill number where customer payments will be deposited.
+    </p>
+    <form id="mpesaForm">
+        <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Payment Type</label>
+            <select id="mpesaType" style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; background: #fff;">
+                <option value="BuyGoods">Buy Goods (Till Number)</option>
+                <option value="Paybill">Paybill Number</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;" id="numLabel">Till / Store Number</label>
+            <input type="text" id="mpesaNumber" placeholder="e.g. 123456" required style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <div id="accountNumberWrapper" style="display: none; margin-bottom: 18px;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #374151;">Paybill Account Name / Prefix</label>
+            <input type="text" id="mpesaAccount" placeholder="e.g. HOTSPOT" style="width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" id="saveMpesaBtn" style="background: #10b981; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">Save M-Pesa Setup</button>
+    </form>
+</div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked to public/user/js/settings.js -->
+<script src="/user/js/settings.js"></script>
+</body>
+</html>

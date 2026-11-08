@@ -17,62 +17,72 @@ const payBtn = document.getElementById("payBtn");
 let currentPackage = null;
 let timer = null;
 
-// --------------------------
-// Load Packages
-// --------------------------
 
 async function loadPackages() {
-
     try {
+        const response = await fetch("/api/packages", {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store"
+        });
 
-        const response = await fetch("/api/packages");
+        const data = await response.json();
 
-        const packages = await response.json();
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load packages."
+            );
+        }
+
+        if (!Array.isArray(data)) {
+            console.error("Unexpected packages response:", data);
+            throw new Error("Server did not return a package list.");
+        }
 
         packageContainer.innerHTML = "";
 
-       packages.forEach(pkg => {
+        if (data.length === 0) {
+            packageContainer.innerHTML =
+                "<p>No packages have been created yet.</p>";
+            return;
+        }
 
-    const name = pkg.name || pkg.packageName;
-    const price = pkg.price || pkg.packagePrice;
-    const duration = pkg.duration || pkg.packageDuration;
+        data.forEach(pkg => {
+            const card = document.createElement("div");
+            card.className = "package-card";
 
-    packageContainer.innerHTML += `
+            const heading = document.createElement("h3");
+            heading.textContent = pkg.name;
 
-    <div class="package-card">
+            const price = document.createElement("p");
+            price.textContent = `KES ${pkg.price}`;
 
-        <h3>${name}</h3>
+            const duration = document.createElement("small");
+            duration.textContent =
+                `${pkg.duration} ${pkg.durationUnit}`;
 
-        <p>KES ${pkg.price}</p>
+            const button = document.createElement("button");
+            button.textContent = "Choose Package";
 
-        <small>${pkg.duration} ${pkg.durationUnit}</small>
+            button.addEventListener("click", () => {
+                selectPackage(
+                    pkg.name,
+                    `KES ${pkg.price}`,
+                    `${pkg.duration} ${pkg.durationUnit}`
+                );
+            });
 
-        <br><br>
+            card.append(heading, price, duration, button);
+            packageContainer.appendChild(card);
+        });
 
-        <button onclick="selectPackage(
-            '${pkg.name}',
-            'KES ${pkg.price}',
-            '${pkg.duration} ${pkg.durationUnit}'
-        )">
-
-            Choose Package
-
-        </button>
-
-    </div>
-
-    `;
-
-});
     } catch (err) {
-
-        console.log(err);
-
-        alert("Unable to load packages.");
-
+        console.error("Load packages error:", err);
+        packageContainer.innerHTML =
+            "<p>Unable to load packages. Please try again.</p>";
     }
-
 }
+
 
 loadPackages();
 

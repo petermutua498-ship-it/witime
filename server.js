@@ -183,7 +183,7 @@ app.use("/api/packages", packageRoutes);
 // Payment routes
 app.use("/api", paymentRoutes);
 
-app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 

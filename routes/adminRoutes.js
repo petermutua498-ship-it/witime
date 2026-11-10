@@ -2,6 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
+const Account = require("../models/Account");
+
 const MikrotikSettings =
     require("../models/mikrotikSettings");
 
@@ -120,6 +122,27 @@ router.post("/login", async (req, res) => {
     }
 
 });
+
+async function getNetworkOwner() {
+    const email = process.env.ADMIN_USERNAME
+        ?.trim()
+        .toLowerCase();
+
+    if (!email) {
+        throw new Error("Network owner email is not configured.");
+    }
+
+    const owner = await Account.findOne({
+        email,
+        status: "active"
+    });
+
+    if (!owner) {
+        throw new Error("WiTime network owner was not found.");
+    }
+
+    return owner;
+}
 
 // ======================================
 // PROTECT ADMIN ROUTES
@@ -437,22 +460,21 @@ router.post("/mikrotik/save", async (req, res) => {
 
         }
 
+        const owner = await getNetworkOwner();
+
 
         // ----------------------------------
         // Get existing password if user
         // didn't enter a new one
         // ----------------------------------
 
-        let existingSettings = null;
+       let existingSettings = null;
 
-        if (!password) {
-
-            existingSettings =
-                await MikrotikSettings
-                    .findOne()
-                    .select("+password");
-
-        }
+if (!password) {
+    existingSettings = await MikrotikSettings
+        .findOne({ owner: owner._id })
+        .select("+password");
+}
 
 
         const finalPassword =
@@ -523,8 +545,9 @@ router.post("/mikrotik/save", async (req, res) => {
         // Save to MongoDB
         // ----------------------------------
 
-        let settings =
-            await MikrotikSettings.findOne();
+        let settings = await MikrotikSettings.findOne({
+    owner: owner._id
+});
 
 
         if (settings) {
@@ -545,21 +568,13 @@ router.post("/mikrotik/save", async (req, res) => {
 
         } else {
 
-            settings =
-                await MikrotikSettings.create({
-
-                    host,
-
-                    username,
-
-                    password:
-                        finalPassword,
-
-                    port:
-                        finalPort
-
-                });
-
+            settings = await MikrotikSettings.create({
+    owner: owner._id,
+    host,
+    username,
+    password: finalPassword,
+    port: finalPort
+});
         }
 
 

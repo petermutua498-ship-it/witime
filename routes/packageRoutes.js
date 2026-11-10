@@ -23,6 +23,53 @@ const allowedUnits = [
 
 const allowedStatuses = ["Active", "Inactive"];
 
+const Account = require("../models/Account");
+
+// PUBLIC PACKAGES FOR CUSTOMER PORTAL
+router.get("/public", async (req, res) => {
+    try {
+        const email = process.env.ADMIN_USERNAME
+            ?.trim()
+            .toLowerCase();
+
+        if (!email) {
+            return res.status(500).json({
+                success: false,
+                message: "Network owner is not configured."
+            });
+        }
+
+        const owner = await Account.findOne({
+            email,
+            status: "active"
+        }).select("_id");
+
+        if (!owner) {
+            return res.status(404).json({
+                success: false,
+                message: "WiTime network is unavailable."
+            });
+        }
+
+        const packages = await Package.find({
+            ownerId: owner._id,
+            status: "Active"
+        })
+        .select("_id name price duration durationUnit")
+        .sort({ price: 1 });
+
+        return res.json(packages);
+
+    } catch (error) {
+        console.error("Public packages error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load packages."
+        });
+    }
+});
+
 // ======================================
 // PROTECT ALL PACKAGE ROUTES
 // ======================================

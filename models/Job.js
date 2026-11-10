@@ -17,6 +17,13 @@ const jobSchema = new mongoose.Schema(
       index: true,
     },
 
+    paymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Payment",
+    unique: true,
+    sparse: true,
+},
+
     command: {
       type: String,
       required: true,

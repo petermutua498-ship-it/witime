@@ -38,7 +38,6 @@ const mikrotikSettingsSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model(
-  "MikrotikSettings",
-  mikrotikSettingsSchema
-);
+module.exports =
+    mongoose.models.MikrotikSettings ||
+    mongoose.model("MikrotikSettings", mikrotikSettingsSchema);

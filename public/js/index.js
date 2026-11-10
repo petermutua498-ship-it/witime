@@ -20,7 +20,7 @@ let timer = null;
 
 async function loadPackages() {
     try {
-        const response = await fetch("/api/packages", {
+        const response = await fetch("/api/packages/public", {
             method: "GET",
             credentials: "include",
             cache: "no-store"
@@ -65,12 +65,13 @@ async function loadPackages() {
             button.textContent = "Choose Package";
 
             button.addEventListener("click", () => {
-                selectPackage(
-                    pkg.name,
-                    `KES ${pkg.price}`,
-                    `${pkg.duration} ${pkg.durationUnit}`
-                );
-            });
+    selectPackage(
+        pkg._id,
+        pkg.name,
+        `KES ${pkg.price}`,
+        `${pkg.duration} ${pkg.durationUnit}`
+    );
+});
 
             card.append(heading, price, duration, button);
             packageContainer.appendChild(card);
@@ -90,22 +91,20 @@ loadPackages();
 // Package Selected
 // --------------------------
 
-window.selectPackage = function(name, price, duration) {
+window.selectPackage = function(id, name, price, duration) {
 
     currentPackage = {
+        id,
         name,
         price,
         duration
     };
 
-    // Display selected package
     selectedPackage.innerText = name;
     selectedPrice.innerText = `${price} • ${duration}`;
 
-    // Show payment section
     paymentSection.style.display = "block";
 
-    // Scroll to payment section
     setTimeout(() => {
 
         paymentSection.scrollIntoView({
@@ -113,16 +112,12 @@ window.selectPackage = function(name, price, duration) {
             block: "center"
         });
 
-        // Automatically place cursor in phone number box
         setTimeout(() => {
-
             phoneInput.focus();
-
         }, 500);
 
     }, 100);
-
-}; 
+};
 
 // ==========================
 // Pay Button
@@ -171,17 +166,9 @@ payBtn.onclick = async function () {
             },
 
             body: JSON.stringify({
-
-                phone: phone,
-
-                packageName: currentPackage.name,
-
-                packagePrice: currentPackage.price,
-
-                packageDuration: currentPackage.duration
-
-            })
-
+    phone: phone,
+    packageId: currentPackage.id
+})
         });
 
         // Prevent HTML 404 pages from causing JSON errors
@@ -212,6 +199,12 @@ payBtn.onclick = async function () {
 
         }
 
+        const checkoutRequestID = data.checkoutRequestID;
+
+if (!checkoutRequestID) {
+    throw new Error("Missing payment reference from server.");
+}
+
         // --------------------------
         // STK SENT
         // --------------------------
@@ -237,7 +230,7 @@ payBtn.onclick = async function () {
             try {
 
                 const r = await fetch(
-                    `/api/check-payment/${encodeURIComponent(phone)}`,
+                    `/api/check-payment/${encodeURIComponent(checkoutRequestID)}`,
                     {
                         cache: "no-store"
                     }

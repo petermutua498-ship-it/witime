@@ -78,8 +78,6 @@ async function connectDatabase() {
 // --------------------------------------------------
 // MIKROTIK POLLING ENDPOINT
 // --------------------------------------------------
-
-
 app.get("/api/mikrotik/jobs", async (req, res) => {
     try {
         // Find all pending jobs
@@ -90,23 +88,30 @@ app.get("/api/mikrotik/jobs", async (req, res) => {
         }
 
         // Extract the commands text
-        const commandsToRun = pendingJobs.map(j => j.command).join("\n");
+        const commandsToRun = pendingJobs
+            .map(j => j.command)
+            .join("\n");
 
-        // Mark these jobs as sent so they aren't repeated
+        // Mark these jobs as sent
         const jobIds = pendingJobs.map(j => j._id);
-        await Job.updateMany({ _id: { $in: jobIds } }, { status: "sent" });
 
-        console.log(" Dispatching queued commands to MikroTik from MongoDB:\n" + commandsToRun);
+        await Job.updateMany(
+            { _id: { $in: jobIds } },
+            { status: "sent" }
+        );
+
+        console.log(
+            "Dispatching queued commands to MikroTik from MongoDB:\n" +
+            commandsToRun
+        );
 
         res.type("text/plain").send(commandsToRun);
+
     } catch (error) {
         console.error("MikroTik polling error:", error);
         res.status(500).send("");
     }
 });
-
-
-
 
 // --------------------------------------------------
 // HEALTH CHECK

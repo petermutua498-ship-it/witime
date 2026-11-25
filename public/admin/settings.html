@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,17 +20,12 @@
     <aside class="sidebar">
 
         <div class="logo">
-
             <img src="/images/logo.png" alt="WiTime">
-
             <h2>WiTime</h2>
-
             <p>Admin Panel</p>
-
         </div>
 
         <ul>
-
             <li onclick="location.href='dashboard.html'">
                 🏠 Dashboard
             </li>
@@ -57,44 +53,37 @@
             <li id="logoutBtn">
                 🚪 Logout
             </li>
-
         </ul>
 
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- MAIN CONTENT -->
 
     <main class="main">
 
         <div class="header">
-
             <div>
                 <h1>Settings</h1>
                 <p>Manage your WiTime system</p>
             </div>
-
         </div>
 
 
-        <!-- ADMIN ACCOUNT -->
+        <!-- ADMINISTRATOR ACCOUNT -->
 
         <section class="settings-card">
 
             <div class="card-header">
-
                 <div>
                     <h2>Administrator Account</h2>
                     <p>Manage your administrator credentials.</p>
                 </div>
-
             </div>
-
 
             <form id="adminSettingsForm">
 
                 <div class="form-group">
-
                     <label for="adminUsername">
                         Username
                     </label>
@@ -105,12 +94,9 @@
                         placeholder="Administrator username"
                         autocomplete="username"
                         required>
-
                 </div>
 
-
                 <div class="form-group">
-
                     <label for="currentPassword">
                         Current Password
                     </label>
@@ -120,14 +106,11 @@
                         id="currentPassword"
                         placeholder="Enter current password"
                         autocomplete="current-password">
-
                 </div>
-
 
                 <div class="form-row">
 
                     <div class="form-group">
-
                         <label for="newPassword">
                             New Password
                         </label>
@@ -137,12 +120,9 @@
                             id="newPassword"
                             placeholder="Leave empty to keep current password"
                             autocomplete="new-password">
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label for="confirmPassword">
                             Confirm New Password
                         </label>
@@ -152,24 +132,14 @@
                             id="confirmPassword"
                             placeholder="Confirm new password"
                             autocomplete="new-password">
-
                     </div>
 
                 </div>
 
+                <div id="adminMessage" class="message"></div>
 
-                <div
-                    id="adminMessage"
-                    class="message">
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="primary-btn">
-
+                <button type="submit" class="primary-btn">
                     Save Account Changes
-
                 </button>
 
             </form>
@@ -182,86 +152,30 @@
         <section class="settings-card">
 
             <div class="card-header">
-
                 <div>
-
                     <h2>System Settings</h2>
-
-                    <p>
-                        General WiTime configuration.
-                    </p>
-
+                    <p>General WiTime configuration.</p>
                 </div>
-
             </div>
-
 
             <form id="systemSettingsForm">
 
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label for="systemName">
-                            System Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="systemName"
-                            value="WiTime">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="maxUsers">
-                            Maximum Connected Users
-                        </label>
-
-                        <input
-                            type="number"
-                            id="maxUsers"
-                            min="1"
-                            value="10">
-
-                    </div>
-
-                </div>
-
-
                 <div class="form-group">
-
-                    <label for="freeMinutes">
-                        Free Wi-Fi Minutes
+                    <label for="systemName">
+                        System Name
                     </label>
 
                     <input
-                        type="number"
-                        id="freeMinutes"
-                        min="0"
-                        value="0">
-
-                    <small>
-                        Set to 0 to disable free access.
-                    </small>
-
+                        type="text"
+                        id="systemName"
+                        value="WiTime"
+                        placeholder="Enter system name">
                 </div>
 
+                <div id="systemMessage" class="message"></div>
 
-                <div
-                    id="systemMessage"
-                    class="message">
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="primary-btn">
-
+                <button type="submit" class="primary-btn">
                     Save System Settings
-
                 </button>
 
             </form>
@@ -269,28 +183,23 @@
         </section>
 
 
-        <!-- MIKROTIK -->
+        <!-- MIKROTIK CONNECTION -->
 
         <section class="settings-card">
 
             <div class="card-header">
 
                 <div>
-
                     <h2>🌐 MikroTik Connection</h2>
-
                     <p>
                         Configure the MikroTik router used by WiTime.
                     </p>
-
                 </div>
 
                 <span
                     id="mikrotikStatus"
                     class="status disconnected">
-
                     Not Connected
-
                 </span>
 
             </div>
@@ -298,10 +207,11 @@
 
             <form id="mikrotikForm">
 
+                <!-- ROUTER CONNECTION -->
+
                 <div class="form-row">
 
                     <div class="form-group">
-
                         <label for="mikrotikHost">
                             Router IP Address
                         </label>
@@ -310,12 +220,9 @@
                             type="text"
                             id="mikrotikHost"
                             placeholder="192.168.88.1">
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label for="mikrotikUsername">
                             Username
                         </label>
@@ -324,7 +231,6 @@
                             type="text"
                             id="mikrotikUsername"
                             placeholder="admin">
-
                     </div>
 
                 </div>
@@ -333,7 +239,6 @@
                 <div class="form-row">
 
                     <div class="form-group">
-
                         <label for="mikrotikPassword">
                             Password
                         </label>
@@ -341,13 +246,11 @@
                         <input
                             type="password"
                             id="mikrotikPassword"
-                            placeholder="Router password">
-
+                            placeholder="Router password"
+                            autocomplete="new-password">
                     </div>
 
-
                     <div class="form-group">
-
                         <label for="mikrotikPort">
                             API Port
                         </label>
@@ -355,181 +258,293 @@
                         <input
                             type="number"
                             id="mikrotikPort"
+                            min="1"
+                            max="65535"
                             value="8728">
-
                     </div>
 
                 </div>
 
 
-                <div
-                    id="mikrotikMessage"
-                    class="message">
+                <!-- HOTSPOT CONFIGURATION -->
+
+                <h3>Hotspot Configuration</h3>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="hotspotSSID">
+                            Hotspot Wi-Fi Name (SSID)
+                        </label>
+
+                        <input
+                            type="text"
+                            id="hotspotSSID"
+                            value="WiTime hotspot"
+                            maxlength="32"
+                            placeholder="WiTime hotspot"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hotspotEnabled">
+                            Hotspot Status
+                        </label>
+
+                        <select id="hotspotEnabled">
+                            <option value="true">Enabled</option>
+                            <option value="false">Disabled</option>
+                        </select>
+                    </div>
+
                 </div>
 
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="routerMaxUsers">
+                            Maximum Connected Users
+                        </label>
+
+                        <input
+                            type="number"
+                            id="routerMaxUsers"
+                            min="1"
+                            max="100"
+                            value="10"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="routerFreeMinutes">
+                            Free Wi-Fi Minutes
+                        </label>
+
+                        <input
+                            type="number"
+                            id="routerFreeMinutes"
+                            min="0"
+                            max="1440"
+                            value="0"
+                            required>
+
+                        <small>
+                            Set to 0 to disable free access.
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <!-- MIKROTIK MESSAGES AND BUTTONS -->
+
+                <div id="mikrotikMessage" class="message"></div>
 
                 <div class="button-row">
 
-                    <button
-                        type="button"
-                        id="testMikrotik"
-                        class="secondary-btn">
+    
 
-                        Test Connection
+    <button
+        type="submit"
+        class="primary-btn">
+        Save MikroTik Settings
+    </button>
 
-                    </button>
+    <button
+        type="button"
+        id="downloadMikrotikConfig"
+        class="secondary-btn">
+        Download Router Configuration
+    </button>
 
+</div>
 
-                    <button
-                        type="submit"
-                        class="primary-btn">
-
-                        Save MikroTik Settings
-
-                    </button>
-
-                </div>
+                
 
             </form>
 
         </section>
 
 
-        <!-- PAYMENT -->
+        <!-- M-PESA PAYMENT CONFIGURATION -->
 
-        
-<!-- M-PESA PAYMENT CONFIGURATION -->
+        <section class="settings-card">
 
-<section class="settings-card">
+            <div class="card-header">
 
-    <div class="card-header">
-        <div>
-            <h2>💳 M-Pesa Payment Configuration</h2>
-            <p>Configure where WiTime customers send their payments.</p>
-        </div>
+                <div>
+                    <h2>💳 M-Pesa Payment Configuration</h2>
+                    <p>
+                        Configure where WiTime customers send their payments.
+                    </p>
+                </div>
 
-        <span id="mpesaStatus" class="status">
-            Checking...
-        </span>
-    </div>
+                <span id="mpesaStatus" class="status">
+                    Checking...
+                </span>
 
-    <form id="paymentSettingsForm">
-
-        <div class="form-row">
-
-            <div class="form-group">
-                <label for="paymentMethod">Payment Method</label>
-
-                <select id="paymentMethod" required>
-                    <option value="till">Buy Goods – Till Number</option>
-                    <option value="paybill">Paybill</option>
-                </select>
             </div>
 
-            <div class="form-group">
-                <label for="mpesaEnvironment">Environment</label>
 
-                <select id="mpesaEnvironment" required>
-                    <option value="sandbox">Sandbox – Testing</option>
-                    <option value="production">Production – Live</option>
-                </select>
-            </div>
+            <form id="paymentSettingsForm">
 
-        </div>
+                <div class="form-row">
 
-        <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentMethod">
+                            Payment Method
+                        </label>
 
-            <div class="form-group">
-                <label for="businessShortCode">
-                    Business Shortcode
-                </label>
+                        <select id="paymentMethod" required>
+                            <option value="till">
+                                Buy Goods – Till Number
+                            </option>
 
-                <input
-                    type="text"
-                    id="businessShortCode"
-                    placeholder="Enter Daraja Business Shortcode"
-                    required>
-            </div>
+                            <option value="paybill">
+                                Paybill
+                            </option>
+                        </select>
+                    </div>
 
-            <div class="form-group" id="tillNumberGroup">
-                <label for="tillNumber">Buy Goods Till Number</label>
+                    <div class="form-group">
+                        <label for="mpesaEnvironment">
+                            Environment
+                        </label>
 
-                <input
-                    type="text"
-                    id="tillNumber"
-                    placeholder="Enter your Till Number">
-            </div>
+                        <select id="mpesaEnvironment" required>
+                            <option value="sandbox">
+                                Sandbox – Testing
+                            </option>
 
-        </div>
+                            <option value="production">
+                                Production – Live
+                            </option>
+                        </select>
+                    </div>
 
-        <div class="form-group">
-            <label for="accountReference">Account Reference</label>
+                </div>
 
-            <input
-                type="text"
-                id="accountReference"
-                value="WiTime"
-                maxlength="12">
-        </div>
 
-        <div class="form-group">
-            <label for="callbackURL">M-Pesa Callback URL</label>
+                <div class="form-row">
 
-            <input
-                type="url"
-                id="callbackURL"
-                placeholder="https://your-domain.com/api/apicallback"
-                required>
-        </div>
+                    <div class="form-group">
+                        <label for="businessShortCode">
+                            Business Shortcode
+                        </label>
 
-        <h3>Daraja API Credentials</h3>
+                        <input
+                            type="text"
+                            id="businessShortCode"
+                            placeholder="Enter Daraja Business Shortcode"
+                            required>
+                    </div>
 
-        <p>
-            Leave existing credentials blank if you do not want to
-            replace them.
-        </p>
+                    <div
+                        class="form-group"
+                        id="tillNumberGroup">
 
-        <div class="form-group">
-            <label for="consumerKey">Consumer Key</label>
+                        <label for="tillNumber">
+                            Buy Goods Till Number
+                        </label>
 
-            <input
-                type="password"
-                id="consumerKey"
-                autocomplete="new-password"
-                placeholder="Enter Consumer Key">
-        </div>
+                        <input
+                            type="text"
+                            id="tillNumber"
+                            placeholder="Enter your Till Number">
+                    </div>
 
-        <div class="form-group">
-            <label for="consumerSecret">Consumer Secret</label>
+                </div>
 
-            <input
-                type="password"
-                id="consumerSecret"
-                autocomplete="new-password"
-                placeholder="Enter Consumer Secret">
-        </div>
 
-        <div class="form-group">
-            <label for="mpesaPasskey">Lipa Na M-Pesa Passkey</label>
+                <div class="form-group">
+                    <label for="accountReference">
+                        Account Reference
+                    </label>
 
-            <input
-                type="password"
-                id="mpesaPasskey"
-                autocomplete="new-password"
-                placeholder="Enter Passkey">
-        </div>
+                    <input
+                        type="text"
+                        id="accountReference"
+                        value="WiTime"
+                        maxlength="12">
+                </div>
 
-        <div id="paymentCredentialsStatus"></div>
 
-        <div id="paymentSettingsMessage" class="message"></div>
+                <div class="form-group">
+                    <label for="callbackURL">
+                        M-Pesa Callback URL
+                    </label>
 
-        <button type="submit" class="primary-btn">
-            Save Payment Configuration
-        </button>
+                    <input
+                        type="url"
+                        id="callbackURL"
+                        placeholder="https://your-domain.com/api/apicallback"
+                        required>
+                </div>
 
-    </form>
 
-</section>
+                <h3>Daraja API Credentials</h3>
+
+                <p>
+                    Leave existing credentials blank if you do not want
+                    to replace them.
+                </p>
+
+
+                <div class="form-group">
+                    <label for="consumerKey">
+                        Consumer Key
+                    </label>
+
+                    <input
+                        type="password"
+                        id="consumerKey"
+                        autocomplete="new-password"
+                        placeholder="Enter Consumer Key">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="consumerSecret">
+                        Consumer Secret
+                    </label>
+
+                    <input
+                        type="password"
+                        id="consumerSecret"
+                        autocomplete="new-password"
+                        placeholder="Enter Consumer Secret">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="mpesaPasskey">
+                        Lipa Na M-Pesa Passkey
+                    </label>
+
+                    <input
+                        type="password"
+                        id="mpesaPasskey"
+                        autocomplete="new-password"
+                        placeholder="Enter Passkey">
+                </div>
+
+
+                <div id="paymentCredentialsStatus"></div>
+
+                <div
+                    id="paymentSettingsMessage"
+                    class="message">
+                </div>
+
+
+                <button type="submit" class="primary-btn">
+                    Save Payment Configuration
+                </button>
+
+            </form>
+
+        </section>
 
 
     </main>
@@ -540,5 +555,4 @@
 <script src="/js/settings.js"></script>
 
 </body>
-
 </html>

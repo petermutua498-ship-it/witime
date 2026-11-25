@@ -3,11 +3,18 @@ const express = require("express");
 const router = express.Router();
 
 const paymentController = require("../controllers/paymentController");
-const requireAccount = require("../middleware/requireAccount");
 
-router.post("/pay", requireAccount, paymentController.pay);
+// Customer requests an M-Pesa STK Push.
+// This is public because hotspot customers do not need WiTime admin accounts.
+router.post("/pay", paymentController.pay);
 
-// Safaricom must be able to reach this endpoint without logging in.
+// Customer checks the status using the CheckoutRequestID.
+router.get(
+    "/check-payment/:checkoutRequestID",
+    paymentController.checkStatus
+);
+
+// Safaricom must reach this endpoint without logging in.
 router.post("/apicallback", paymentController.callback);
 
 module.exports = router;

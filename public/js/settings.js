@@ -1,168 +1,200 @@
+
 // ======================================
-// ADMIN ACCOUNT
+// WITIME ADMIN SETTINGS
 // ======================================
 
-const adminForm = document.getElementById("adminSettingsForm");
+document.addEventListener("DOMContentLoaded", () => {
 
-if (adminForm) {
+    // ======================================
+    // HELPER FUNCTIONS
+    // ======================================
 
-    adminForm.addEventListener("submit", async function (event) {
+    const getValue = (id) => {
+        const element = document.getElementById(id);
+        return element ? element.value : "";
+    };
 
-        event.preventDefault();
+    const setValue = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.value = value ?? "";
+    };
 
-        const message = document.getElementById("adminMessage");
+    const setMessage = (id, message, type = "") => {
+        const element = document.getElementById(id);
 
-        const username =
-            document.getElementById("adminUsername").value.trim();
+        if (!element) return;
 
-        const currentPassword =
-            document.getElementById("currentPassword").value;
+        element.textContent = message;
+        element.className = "message";
 
-        const newPassword =
-            document.getElementById("newPassword").value;
-
-        const confirmPassword =
-            document.getElementById("confirmPassword").value;
-
-        message.textContent = "";
-        message.className = "message";
-
-        if (!username) {
-            message.textContent = "Username is required.";
-            message.classList.add("error");
-            return;
+        if (type) {
+            element.classList.add(type);
         }
+    };
 
-        // If changing password, all password fields are required
-        if (newPassword || confirmPassword || currentPassword) {
+    const setStatus = (id, message, connected = true) => {
+        const element = document.getElementById(id);
 
-            if (!currentPassword) {
-                message.textContent =
-                    "Enter your current password.";
-                message.classList.add("error");
+        if (!element) return;
+
+        element.textContent = message;
+        element.className = connected
+            ? "status connected"
+            : "status disconnected";
+    };
+
+
+    // ======================================
+    // ADMIN ACCOUNT
+    // ======================================
+
+    const adminForm =
+        document.getElementById("adminSettingsForm");
+
+    if (adminForm) {
+
+        adminForm.addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            const username = getValue("adminUsername").trim();
+            const currentPassword = getValue("currentPassword");
+            const newPassword = getValue("newPassword");
+            const confirmPassword = getValue("confirmPassword");
+
+            setMessage("adminMessage", "");
+
+            if (!username) {
+                setMessage(
+                    "adminMessage",
+                    "Username is required.",
+                    "error"
+                );
                 return;
             }
 
-            if (!newPassword) {
-                message.textContent =
-                    "Enter a new password.";
-                message.classList.add("error");
-                return;
+            if (newPassword || confirmPassword || currentPassword) {
+
+                if (!currentPassword) {
+                    setMessage(
+                        "adminMessage",
+                        "Enter your current password.",
+                        "error"
+                    );
+                    return;
+                }
+
+                if (!newPassword) {
+                    setMessage(
+                        "adminMessage",
+                        "Enter a new password.",
+                        "error"
+                    );
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    setMessage(
+                        "adminMessage",
+                        "New passwords do not match.",
+                        "error"
+                    );
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    setMessage(
+                        "adminMessage",
+                        "New password must be at least 6 characters.",
+                        "error"
+                    );
+                    return;
+                }
             }
 
-            if (newPassword !== confirmPassword) {
-                message.textContent =
-                    "New passwords do not match.";
-                message.classList.add("error");
-                return;
-            }
+            setMessage(
+                "adminMessage",
+                "Saving account changes..."
+            );
 
-            if (newPassword.length < 6) {
-                message.textContent =
-                    "New password must be at least 6 characters.";
-                message.classList.add("error");
-                return;
-            }
-        }
+            try {
 
-        message.textContent =
-            "Saving account changes...";
+                const response = await fetch(
+                    "/api/admin/update-account",
+                    {
+                        method: "PUT",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            username,
+                            currentPassword,
+                            newPassword
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    setMessage(
+                        "adminMessage",
+                        result.message || "Unable to update account.",
+                        "error"
+                    );
+                    return;
+                }
+
+                setMessage(
+                    "adminMessage",
+                    "Account updated successfully.",
+                    "success"
+                );
+
+                setValue("currentPassword", "");
+                setValue("newPassword", "");
+                setValue("confirmPassword", "");
+
+                // Require a fresh login after password change.
+                if (newPassword) {
+                    setTimeout(() => {
+                        window.location.replace(
+                            "/admin/login.html"
+                        );
+                    }, 1500);
+                }
+
+            } catch (error) {
+
+                console.error("Account update error:", error);
+
+                setMessage(
+                    "adminMessage",
+                    "Unable to contact the server.",
+                    "error"
+                );
+            }
+        });
+    }
+
+
+    // ======================================
+    // MIKROTIK SETTINGS
+    // ======================================
+
+    const mikrotikForm =
+        document.getElementById("mikrotikForm");
+
+    // ======================================
+    // LOAD SAVED MIKROTIK SETTINGS
+    // ======================================
+
+    async function loadMikrotikSettings() {
 
         try {
 
             const response = await fetch(
-                "/api/admin/update-account",
-                {
-                    method: "PUT",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        username,
-                        currentPassword,
-                        newPassword
-                    })
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-
-                message.textContent =
-                    result.message ||
-                    "Unable to update account.";
-
-                message.classList.add("error");
-
-                return;
-            }
-
-            message.textContent =
-                "Account updated successfully.";
-
-            message.classList.add("success");
-
-            // Clear password fields
-            document.getElementById("currentPassword").value = "";
-            document.getElementById("newPassword").value = "";
-            document.getElementById("confirmPassword").value = "";
-
-            /*
-             * If the password was changed, force a new login.
-             * This is safer than leaving the old session active.
-             */
-            if (newPassword) {
-
-                setTimeout(() => {
-
-                    window.location.replace(
-                        "/admin/login.html"
-                    );
-
-                }, 1500);
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Account update error:",
-                error
-            );
-
-            message.textContent =
-                "Unable to contact the server.";
-
-            message.classList.add("error");
-        }
-
-    });
-
-}
-
-// ======================================
-// MIKROTIK
-// ======================================
-
-const mikrotikForm =
-    document.getElementById("mikrotikForm");
-
-const testMikrotik =
-    document.getElementById("testMikrotik");
-
-
-// ======================================
-// LOAD SAVED MIKROTIK SETTINGS
-// ======================================
-
-async function loadMikrotikSettings() {
-
-    try {
-
-        const response =
-            await fetch(
                 "/api/admin/mikrotik/settings",
                 {
                     credentials: "include",
@@ -170,532 +202,408 @@ async function loadMikrotikSettings() {
                 }
             );
 
+            const data = await response.json();
 
-        const data =
-            await response.json();
-
-
-        if (
-            !response.ok ||
-            !data.success
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            data.configured &&
-            data.mikrotik
-        ) {
-
-            document.getElementById(
-                "mikrotikHost"
-            ).value =
-                data.mikrotik.host || "";
-
-
-            document.getElementById(
-                "mikrotikUsername"
-            ).value =
-                data.mikrotik.username || "";
-
-
-            document.getElementById(
-                "mikrotikPort"
-            ).value =
-                data.mikrotik.port || 8728;
-
-
-            const status =
-                document.getElementById(
-                    "mikrotikStatus"
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Unable to load MikroTik settings."
                 );
-
-
-            if (status) {
-
-                status.textContent =
-                    "Configured";
-
-                status.className =
-                    "status connected";
-
             }
 
+            if (!data.configured || !data.mikrotik) {
+                setStatus(
+                    "mikrotikStatus",
+                    "Not Configured",
+                    false
+                );
+                return;
+            }
+
+            const mikrotik = data.mikrotik;
+
+            setValue("mikrotikHost", mikrotik.host);
+            setValue("mikrotikUsername", mikrotik.username);
+            setValue("mikrotikPort", mikrotik.port || 8728);
+
+            // Hotspot settings
+            setValue(
+                "hotspotSSID",
+                mikrotik.hotspotSSID || "WiTime hotspot"
+            );
+
+            setValue(
+                "routerMaxUsers",
+                mikrotik.maxUsers ?? 10
+            );
+
+            setValue(
+                "routerFreeMinutes",
+                mikrotik.freeMinutes ?? 0
+            );
+
+            setValue(
+                "hotspotEnabled",
+                String(mikrotik.hotspotEnabled ?? true)
+            );
+
+            setStatus(
+                "mikrotikStatus",
+                "Configured",
+                true
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load MikroTik settings:",
+                error
+            );
+
+            setStatus(
+                "mikrotikStatus",
+                "Unable to Load",
+                false
+            );
         }
-
-    } catch (error) {
-
-        console.error(
-            "Unable to load MikroTik settings:",
-            error
-        );
-
     }
 
-}
 
+    // ======================================
+    // SAVE MIKROTIK AND HOTSPOT SETTINGS
+    // ======================================
 
-// ======================================
-// TEST MIKROTIK
-// ======================================
+    if (mikrotikForm) {
 
-if (testMikrotik) {
-
-    testMikrotik.addEventListener(
-        "click",
-        async function () {
-
-            const message =
-                document.getElementById(
-                    "mikrotikMessage"
-                );
-
-
-            const host =
-                document.getElementById(
-                    "mikrotikHost"
-                ).value.trim();
-
-
-            const username =
-                document.getElementById(
-                    "mikrotikUsername"
-                ).value.trim();
-
-
-            const password =
-                document.getElementById(
-                    "mikrotikPassword"
-                ).value;
-
-
-            const port =
-                document.getElementById(
-                    "mikrotikPort"
-                ).value.trim();
-
-
-            if (!host || !username) {
-
-                message.textContent =
-                    "Enter the MikroTik host and username.";
-
-                return;
-
-            }
-
-
-            message.textContent =
-                "Testing MikroTik connection...";
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/admin/mikrotik/test",
-                        {
-
-                            method: "POST",
-
-                            credentials: "include",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify({
-
-                                    host,
-
-                                    username,
-
-                                    password,
-
-                                    port:
-                                        Number(port) ||
-                                        8728
-
-                                })
-
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    message.textContent =
-                        data.message ||
-                        "MikroTik connection failed.";
-
-                    return;
-
-                }
-
-
-                message.textContent =
-                    "✅ MikroTik connection successful.";
-
-
-                const status =
-                    document.getElementById(
-                        "mikrotikStatus"
-                    );
-
-
-                if (status) {
-
-                    status.textContent =
-                        "Connected";
-
-                    status.className =
-                        "status connected";
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "MikroTik test error:",
-                    error
-                );
-
-                message.textContent =
-                    "Unable to connect to MikroTik.";
-
-            }
-
-        }
-    );
-
-}
-
-
-// ======================================
-// SAVE MIKROTIK
-// ======================================
-
-if (mikrotikForm) {
-
-    mikrotikForm.addEventListener(
-        "submit",
-        async function (event) {
+        mikrotikForm.addEventListener("submit", async (event) => {
 
             event.preventDefault();
 
+            const host = getValue("mikrotikHost").trim();
+            const username = getValue("mikrotikUsername").trim();
+            const password = getValue("mikrotikPassword");
+            const port = Number(getValue("mikrotikPort")) || 8728;
 
-            const message =
-                document.getElementById(
-                    "mikrotikMessage"
-                );
+            const hotspotSSID =
+                getValue("hotspotSSID").trim();
 
+            const hotspotEnabled =
+                getValue("hotspotEnabled") === "true";
 
-            const host =
-                document.getElementById(
-                    "mikrotikHost"
-                ).value.trim();
+            const maxUsers =
+                Number(getValue("routerMaxUsers"));
 
-
-            const username =
-                document.getElementById(
-                    "mikrotikUsername"
-                ).value.trim();
-
-
-            const password =
-                document.getElementById(
-                    "mikrotikPassword"
-                ).value;
-
-
-            const port =
-                document.getElementById(
-                    "mikrotikPort"
-                ).value.trim();
-
+            const freeMinutes =
+                Number(getValue("routerFreeMinutes"));
 
             if (!host || !username) {
-
-                message.textContent =
-                    "Enter the MikroTik host and username.";
-
+                setMessage(
+                    "mikrotikMessage",
+                    "Enter the MikroTik host and username.",
+                    "error"
+                );
                 return;
-
             }
 
+            if (!hotspotSSID) {
+                setMessage(
+                    "mikrotikMessage",
+                    "Enter a hotspot Wi-Fi name.",
+                    "error"
+                );
+                return;
+            }
 
-            message.textContent =
-                "Saving MikroTik settings...";
+            if (hotspotSSID.length > 32) {
+    setMessage(
+        "mikrotikMessage",
+        "Hotspot name cannot exceed 32 characters.",
+        "error"
+    );
+    return;
+}
 
+            if (
+    !Number.isInteger(maxUsers) ||
+    maxUsers < 1 ||
+    maxUsers > 100
+) {
+                setMessage(
+                    "mikrotikMessage",
+                    "Maximum users must be between 1 and 100.",
+                    "error"
+                );
+                return;
+            }
+
+            if (
+    !Number.isInteger(freeMinutes) ||
+    freeMinutes < 0 ||
+    freeMinutes > 1440
+) {
+    setMessage(
+        "mikrotikMessage",
+        "Free minutes must be between 0 and 1440.",
+        "error"
+    );
+    return;
+}
+                
+
+            if (
+                !Number.isInteger(port) ||
+                port < 1 ||
+                port > 65535
+            ) {
+                setMessage(
+                    "mikrotikMessage",
+                    "Enter a valid MikroTik API port.",
+                    "error"
+                );
+                return;
+            }
+
+            setMessage(
+                "mikrotikMessage",
+                "Saving MikroTik and hotspot settings..."
+            );
+
+            const saveButton =
+                mikrotikForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+            }
 
             try {
 
-                const response =
-                    await fetch(
-                        "/api/admin/mikrotik/save",
-                        {
+                const response = await fetch(
+                    "/api/admin/mikrotik/save",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            host,
+                            username,
+                            password,
+                            port,
+                            hotspotSSID,
+                            hotspotEnabled,
+                            maxUsers,
+                            freeMinutes
+                        })
+                    }
+                );
 
-                            method: "POST",
+                const data = await response.json();
 
-                            credentials: "include",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify({
-
-                                    host,
-
-                                    username,
-
-                                    password,
-
-                                    port:
-                                        Number(port) ||
-                                        8728
-
-                                })
-
-                        }
+                if (!response.ok || !data.success) {
+                    setMessage(
+                        "mikrotikMessage",
+                        data.message || "Unable to save MikroTik settings.",
+                        "error"
                     );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    message.textContent =
-                        data.message ||
-                        "Unable to save MikroTik settings.";
-
                     return;
-
                 }
 
+                // Clear password field after successful save.
+                setValue("mikrotikPassword", "");
 
-                message.textContent =
-                    "✅ MikroTik settings saved successfully.";
+                setMessage(
+                    "mikrotikMessage",
+                    "MikroTik and hotspot settings saved successfully.",
+                    "success"
+                );
 
-
-                const status =
-                    document.getElementById(
-                        "mikrotikStatus"
-                    );
-
-
-                if (status) {
-
-                    status.textContent =
-                        "Connected";
-
-                    status.className =
-                        "status connected";
-
-                }
+                setStatus(
+                    "mikrotikStatus",
+                    "Configured",
+                    true
+                );
 
             } catch (error) {
 
-                console.error(
-                    "MikroTik save error:",
-                    error
+                console.error("MikroTik save error:", error);
+
+                setMessage(
+                    "mikrotikMessage",
+                    "Unable to save MikroTik settings.",
+                    "error"
                 );
 
-                message.textContent =
-                    "Unable to save MikroTik settings.";
+            } finally {
 
+                if (saveButton) {
+                    saveButton.disabled = false;
+                }
             }
-
-        }
-    );
-
-}
-
-window.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadAdmin();
-
-        loadMikrotikSettings();
-
+        });
     }
-);
-
 
 // ======================================
-// M-PESA PAYMENT SETTINGS
+// DOWNLOAD MIKROTIK CONFIGURATION
 // ======================================
 
-const paymentSettingsForm =
-    document.getElementById("paymentSettingsForm");
+const downloadMikrotikConfig =
+    document.getElementById("downloadMikrotikConfig");
 
-const paymentMethodSelect =
-    document.getElementById("paymentMethod");
+if (downloadMikrotikConfig) {
 
-const tillNumberGroup =
-    document.getElementById("tillNumberGroup");
+    downloadMikrotikConfig.addEventListener("click", async () => {
 
-function updatePaymentMethodFields() {
-    if (!paymentMethodSelect || !tillNumberGroup) return;
+        const originalText = downloadMikrotikConfig.textContent;
 
-    const isTill = paymentMethodSelect.value === "till";
+        downloadMikrotikConfig.disabled = true;
+        downloadMikrotikConfig.textContent = "Preparing Download...";
 
-    tillNumberGroup.style.display = isTill ? "" : "none";
-
-    document.getElementById("tillNumber").required = isTill;
-}
-
-if (paymentMethodSelect) {
-    paymentMethodSelect.addEventListener(
-        "change",
-        updatePaymentMethodFields
-    );
-}
-
-async function loadPaymentSettings() {
-    const status = document.getElementById("mpesaStatus");
-    const credentialsStatus = document.getElementById(
-        "paymentCredentialsStatus"
-    );
-
-    try {
-        const response = await fetch(
-            "/api/admin/payment-settings",
-            {
-                credentials: "include",
-                cache: "no-store"
-            }
+        setMessage(
+            "mikrotikMessage",
+            "Generating your MikroTik configuration..."
         );
 
-        const data = await response.json();
+        try {
 
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || "Unable to load settings.");
+            const response = await fetch(
+                "/api/admin/mikrotik/download-rsc",
+                {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+
+                let message = "Unable to download router configuration.";
+
+                try {
+                    const data = await response.json();
+                    message = data.message || message;
+                } catch (_) {}
+
+                throw new Error(message);
+            }
+
+            const blob = await response.blob();
+
+            if (!blob.size) {
+                throw new Error("The generated configuration file is empty.");
+            }
+
+            const downloadUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = "witime-hotspot.rsc";
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(() => {
+    URL.revokeObjectURL(downloadUrl);
+}, 1000);
+
+            setMessage(
+                "mikrotikMessage",
+                "Router configuration downloaded successfully.",
+                "success"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "MikroTik configuration download error:",
+                error
+            );
+
+            setMessage(
+                "mikrotikMessage",
+                error.message || "Configuration download failed.",
+                "error"
+            );
+
+        } finally {
+
+            downloadMikrotikConfig.disabled = false;
+            downloadMikrotikConfig.textContent = originalText;
+
         }
+    });
+}
 
-        if (!data.configured) {
-            status.textContent = "Not Configured";
-            status.className = "status disconnected";
-            updatePaymentMethodFields();
+
+    // ======================================
+    // M-PESA PAYMENT SETTINGS
+    // ======================================
+
+    const paymentSettingsForm =
+        document.getElementById("paymentSettingsForm");
+
+    const paymentMethodSelect =
+        document.getElementById("paymentMethod");
+
+    const tillNumberGroup =
+        document.getElementById("tillNumberGroup");
+
+
+    // ======================================
+    // SHOW/HIDE TILL NUMBER
+    // ======================================
+
+    function updatePaymentMethodFields() {
+
+        if (!paymentMethodSelect || !tillNumberGroup) {
             return;
         }
 
-        const payment = data.payment;
+        const isTill =
+            paymentMethodSelect.value === "till";
 
-        document.getElementById("paymentMethod").value =
-            payment.paymentMethod;
+        tillNumberGroup.style.display =
+            isTill ? "" : "none";
 
-        document.getElementById("mpesaEnvironment").value =
-            payment.environment;
+        const tillNumber =
+            document.getElementById("tillNumber");
 
-        document.getElementById("businessShortCode").value =
-            payment.businessShortCode || "";
-
-        document.getElementById("tillNumber").value =
-            payment.paymentMethod === "till"
-                ? payment.partyB || ""
-                : "";
-
-        document.getElementById("accountReference").value =
-            payment.accountReference || "WiTime";
-
-        document.getElementById("callbackURL").value =
-            payment.callbackURL || "";
-
-        status.textContent = "Configured";
-        status.className = "status connected";
-
-        credentialsStatus.textContent =
-            "Consumer Key: " +
-            (payment.consumerKeyConfigured ? "Saved" : "Missing") +
-            " | Consumer Secret: " +
-            (payment.consumerSecretConfigured ? "Saved" : "Missing") +
-            " | Passkey: " +
-            (payment.passkeyConfigured ? "Saved" : "Missing");
-
-        updatePaymentMethodFields();
-
-    } catch (error) {
-        console.error("Payment settings load error:", error);
-
-        status.textContent = "Unable to Load";
-        status.className = "status disconnected";
+        if (tillNumber) {
+            tillNumber.required = isTill;
+        }
     }
-}
 
-
-// SAVE PAYMENT SETTINGS
-
-if (paymentSettingsForm) {
-    paymentSettingsForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const message = document.getElementById(
-            "paymentSettingsMessage"
+    if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener(
+            "change",
+            updatePaymentMethodFields
         );
+    }
 
-        message.textContent = "Saving payment configuration...";
-        message.className = "message";
 
-        const payload = {
-            paymentMethod:
-                document.getElementById("paymentMethod").value,
+    // ======================================
+    // LOAD M-PESA SETTINGS
+    // ======================================
 
-            environment:
-                document.getElementById("mpesaEnvironment").value,
+    async function loadPaymentSettings() {
 
-            businessShortCode:
-                document.getElementById("businessShortCode").value.trim(),
+        const status =
+            document.getElementById("mpesaStatus");
 
-            tillNumber:
-                document.getElementById("tillNumber").value.trim(),
-
-            accountReference:
-                document.getElementById("accountReference").value.trim(),
-
-            callbackURL:
-                document.getElementById("callbackURL").value.trim(),
-
-            consumerKey:
-                document.getElementById("consumerKey").value.trim(),
-
-            consumerSecret:
-                document.getElementById("consumerSecret").value.trim(),
-
-            passkey:
-                document.getElementById("mpesaPasskey").value.trim()
-        };
+        const credentialsStatus =
+            document.getElementById(
+                "paymentCredentialsStatus"
+            );
 
         try {
+
             const response = await fetch(
                 "/api/admin/payment-settings",
                 {
-                    method: "PUT",
                     credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
+                    cache: "no-store"
                 }
             );
 
@@ -703,80 +611,258 @@ if (paymentSettingsForm) {
 
             if (!response.ok || !data.success) {
                 throw new Error(
-                    data.message || "Unable to save configuration."
+                    data.message || "Unable to load payment settings."
                 );
             }
 
-            message.textContent = data.message;
-            message.classList.add("success");
+            if (!data.configured) {
 
-            // Clear secret inputs after saving.
-            document.getElementById("consumerKey").value = "";
-            document.getElementById("consumerSecret").value = "";
-            document.getElementById("mpesaPasskey").value = "";
+                if (status) {
+                    status.textContent = "Not Configured";
+                    status.className = "status disconnected";
+                }
 
-            await loadPaymentSettings();
+                updatePaymentMethodFields();
+                return;
+            }
+
+            const payment = data.payment;
+
+            setValue(
+                "paymentMethod",
+                payment.paymentMethod
+            );
+
+            setValue(
+                "mpesaEnvironment",
+                payment.environment
+            );
+
+            setValue(
+                "businessShortCode",
+                payment.businessShortCode || ""
+            );
+
+            setValue(
+                "tillNumber",
+                payment.paymentMethod === "till"
+                    ? payment.partyB || ""
+                    : ""
+            );
+
+            setValue(
+                "accountReference",
+                payment.accountReference || "WiTime"
+            );
+
+            setValue(
+                "callbackURL",
+                payment.callbackURL || ""
+            );
+
+            if (status) {
+                status.textContent = "Configured";
+                status.className = "status connected";
+            }
+
+            if (credentialsStatus) {
+
+                credentialsStatus.textContent =
+                    "Consumer Key: " +
+                    (payment.consumerKeyConfigured ? "Saved" : "Missing") +
+                    " | Consumer Secret: " +
+                    (payment.consumerSecretConfigured ? "Saved" : "Missing") +
+                    " | Passkey: " +
+                    (payment.passkeyConfigured ? "Saved" : "Missing");
+            }
+
+            updatePaymentMethodFields();
 
         } catch (error) {
-            console.error("Payment settings save error:", error);
 
-            message.textContent = error.message;
-            message.classList.add("error");
+            console.error(
+                "Payment settings load error:",
+                error
+            );
+
+            if (status) {
+                status.textContent = "Unable to Load";
+                status.className = "status disconnected";
+            }
         }
-    });
-}
+    }
 
 
-// LOAD PAYMENT SETTINGS WHEN THE PAGE OPENS
+    // ======================================
+    // SAVE M-PESA SETTINGS
+    // ======================================
 
-window.addEventListener("DOMContentLoaded", () => {
-    updatePaymentMethodFields();
-    loadPaymentSettings();
-});
+    if (paymentSettingsForm) {
 
-// ======================================
-// WITime ADMIN LOGOUT
-// ======================================
+        paymentSettingsForm.addEventListener(
+            "submit",
+            async (event) => {
 
-const logoutBtn = document.getElementById("logoutBtn");
+                event.preventDefault();
 
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", async function () {
+                setMessage(
+                    "paymentSettingsMessage",
+                    "Saving payment configuration..."
+                );
 
-        const confirmLogout = confirm(
-            "Are you sure you want to logout of WiTime?"
+                const payload = {
+
+                    paymentMethod:
+                        getValue("paymentMethod"),
+
+                    environment:
+                        getValue("mpesaEnvironment"),
+
+                    businessShortCode:
+                        getValue("businessShortCode").trim(),
+
+                    tillNumber:
+                        getValue("tillNumber").trim(),
+
+                    accountReference:
+                        getValue("accountReference").trim(),
+
+                    callbackURL:
+                        getValue("callbackURL").trim(),
+
+                    consumerKey:
+                        getValue("consumerKey").trim(),
+
+                    consumerSecret:
+                        getValue("consumerSecret").trim(),
+
+                    passkey:
+                        getValue("mpesaPasskey").trim()
+                };
+
+                try {
+
+                    const response = await fetch(
+                        "/api/admin/payment-settings",
+                        {
+                            method: "PUT",
+                            credentials: "include",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(
+                            data.message ||
+                            "Unable to save payment configuration."
+                        );
+                    }
+
+                    setMessage(
+                        "paymentSettingsMessage",
+                        data.message || "Payment settings saved successfully.",
+                        "success"
+                    );
+
+                    // Clear secret inputs after saving.
+                    setValue("consumerKey", "");
+                    setValue("consumerSecret", "");
+                    setValue("mpesaPasskey", "");
+
+                    await loadPaymentSettings();
+
+                } catch (error) {
+
+                    console.error(
+                        "Payment settings save error:",
+                        error
+                    );
+
+                    setMessage(
+                        "paymentSettingsMessage",
+                        error.message || "Unable to save payment settings.",
+                        "error"
+                    );
+                }
+            }
         );
+    }
 
-        if (!confirmLogout) return;
 
-        logoutBtn.disabled = true;
-        logoutBtn.textContent = "Logging out...";
+    // ======================================
+    // ADMIN LOGOUT
+    // ======================================
 
-        try {
-            const response = await fetch("/api/admin/logout", {
-                method: "POST",
-                credentials: "include",
-                cache: "no-store"
-            });
+    const logoutBtn =
+        document.getElementById("logoutBtn");
 
-            const result = await response.json();
+    if (logoutBtn) {
 
-            if (!response.ok || !result.success) {
-                throw new Error(
-                    result.message || "Logout failed."
+        logoutBtn.addEventListener("click", async () => {
+
+            const confirmLogout = confirm(
+                "Are you sure you want to logout of WiTime?"
+            );
+
+            if (!confirmLogout) return;
+
+            logoutBtn.disabled = true;
+            logoutBtn.textContent = "Logging out...";
+
+            try {
+
+                const response = await fetch(
+                    "/api/admin/logout",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        cache: "no-store"
+                    }
                 );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.message || "Logout failed."
+                    );
+                }
+
+                window.location.replace(
+                    "/admin/login.html"
+                );
+
+            } catch (error) {
+
+                console.error("Logout error:", error);
+
+                alert(
+                    error.message || "Unable to logout."
+                );
+
+                logoutBtn.disabled = false;
+                logoutBtn.textContent = "Logout";
             }
+        });
+    }
 
-            window.location.replace("/admin/login.html");
 
-        } catch (error) {
+    // ======================================
+    // LOAD SETTINGS WHEN PAGE OPENS
+    // ======================================
 
-            console.error("Logout error:", error);
+    // Load admin details if the existing function is available.
+    if (typeof window.loadAdmin === "function") {
+        window.loadAdmin();
+    }
 
-            alert(error.message || "Unable to logout.");
+    loadMikrotikSettings();
+    loadPaymentSettings();
+    updatePaymentMethodFields();
 
-            logoutBtn.disabled = false;
-            logoutBtn.textContent = "Logout";
-        }
-    });
-}
+});
